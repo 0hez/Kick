@@ -165,25 +165,24 @@ async function connect(){
 
 // Send
 async function send(text){
- text=(text||'').trim();if(!text)return false;
- if(!user){sys('Log in to send messages.');return false}
- if(!S.bid){sys('Could not find this channel yet.');return false}
+ text=(text||'').trim();if(!text)return;
+ if(!user){sys('Log in to send messages.');return}
+ if(!S.bid){sys('Could not find this channel yet.');return}
  const wait=1500-(Date.now()-lastSend);
- if(wait>0){sys('Please wait before sending again.');return false}
+ if(wait>0){sys('Slow down a little.');return}
  lastSend=Date.now();
  try{
   const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({broadcaster_user_id:Number(S.bid),content:text})});
-  if(r.status===401){user=null;showUser();sys('Session expired. Log in again.');return false}
-  if(!r.ok){sys('Send failed ('+r.status+').');return false}
+  if(r.status===401){user=null;showUser();sys('Session expired. Log in again.');return}
+  if(!r.ok){sys('Send failed ('+r.status+').');return}
   if(S.colmode==='fixed'){S.col=S.col||randColor();save()}
   const col=S.colmode==='fixed'?S.col:randColor();
   line(user.name,col,text);
   $('#msg').value='';$('#msg').focus();
-  return true;
- }catch(e){sys('Send blocked by the browser or network.');return false}
+ }catch(e){sys('Send blocked by the browser or network. Try again or check your token.')}
 }
 
-// Bounded repeat sender: fixed intervals, with no rate-limit workarounds.
+// Bounded repeat sender. Uses a fixed, conservative interval and stops on errors.
 let repeatTimer=null, repeatEnd=0, repeatBusy=false;
 function stopRepeat(){
  if(repeatTimer!==null)clearTimeout(repeatTimer);
