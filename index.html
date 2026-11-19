@@ -44,6 +44,9 @@ header button{padding:9px 10px}
 #msg{width:0}
 #emo{display:none;gap:6px;overflow-x:auto}
 #emo.open{display:flex}
+#repeatPanel{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+#repeatPanel select,#repeatPanel button{padding:7px 9px}
+#repeatState{color:var(--mut);font-size:12px}
 .ib{padding:9px 11px}
 @media(max-width:520px){header b{display:none}}
 @media(min-width:860px){
@@ -162,22 +165,55 @@ async function connect(){
 
 // Send
 async function send(text){
- text=(text||'').trim();if(!text)return;
- if(!user){sys('Log in to send messages.');return}
- if(!S.bid){sys('Could not find this channel yet.');return}
+ text=(text||'').trim();if(!text)return false;
+ if(!user){sys('Log in to send messages.');return false}
+ if(!S.bid){sys('Could not find this channel yet.');return false}
  const wait=1500-(Date.now()-lastSend);
- if(wait>0){sys('Slow down a little.');return}
+ if(wait>0){sys('Please wait before sending again.');return false}
  lastSend=Date.now();
  try{
   const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({broadcaster_user_id:Number(S.bid),content:text})});
-  if(r.status===401){user=null;showUser();sys('Session expired. Log in again.');return}
-  if(!r.ok){sys('Send failed ('+r.status+').');return}
+  if(r.status===401){user=null;showUser();sys('Session expired. Log in again.');return false}
+  if(!r.ok){sys('Send failed ('+r.status+').');return false}
   if(S.colmode==='fixed'){S.col=S.col||randColor();save()}
   const col=S.colmode==='fixed'?S.col:randColor();
   line(user.name,col,text);
   $('#msg').value='';$('#msg').focus();
- }catch(e){sys('Send blocked by the browser or network. Try again or check your token.')}
+  return true;
+ }catch(e){sys('Send blocked by the browser or network.');return false}
 }
+
+// Bounded repeat sender: fixed intervals, with no rate-limit workarounds.
+let repeatTimer=null, repeatEnd=0, repeatBusy=false;
+function stopRepeat(){
+ if(repeatTimer!==null)clearTimeout(repeatTimer);
+ repeatTimer=null;repeatEnd=0;repeatBusy=false;
+ $('#repeatToggle').disabled=false;$('#repeatStop').disabled=true;
+ $('#repeatState').textContent='';
+}
+async function repeatTick(message,interval){
+ if(repeatBusy)return;
+ if(Date.now()>=repeatEnd){stopRepeat();return}
+ repeatBusy=true;
+ const ok=await send(message);
+ repeatBusy=false;
+ if(!ok){stopRepeat();return}
+ const remaining=repeatEnd-Date.now();
+ if(remaining<=0){stopRepeat();return}
+ repeatTimer=setTimeout(()=>repeatTick(message,interval),Math.min(interval,remaining));
+}
+$('#repeatToggle').onclick=()=>{
+ const message=$('#msg').value.trim();
+ if(!message||!user||!S.bid){sys('Enter a message, log in, and load a channel first.');return}
+ if(repeatTimer!==null||repeatBusy)return;
+ const duration=Number($('#repeatDuration').value);
+ const interval=Math.max(30000,Number($('#repeatInterval').value));
+ repeatEnd=Date.now()+duration;
+ $('#repeatToggle').disabled=true;$('#repeatStop').disabled=false;
+ $('#repeatState').textContent='Repeating…';
+ repeatTick(message,interval);
+};
+$('#repeatStop').onclick=stopRepeat;
 
 // UI wiring
 $('#go').onclick=()=>watch($('#ch').value);
