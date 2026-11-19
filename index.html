@@ -5,21 +5,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>KickDeck</title>
 <style>
-:root{--bg:#050607;--panel:#151719;--line:#292d30;--tx:#f4f5f6;--mut:#9ba1a6;--g:#53fc18;--r:12px;color-scheme:dark}
-*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:14px/1.35 system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
-body{position:fixed;inset:0;height:var(--app-vh,100dvh);display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);min-width:0;min-height:0}
-header{display:flex;align-items:center;gap:6px;padding:7px 9px;border-bottom:1px solid var(--line);min-width:0;background:#090b0c;z-index:2}
-header b{color:var(--g);font-size:16px;white-space:nowrap}input,button,select{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;min-width:0}input:focus,button:focus-visible,select:focus-visible{outline:2px solid var(--g);outline-offset:1px}button{cursor:pointer;touch-action:manipulation;white-space:nowrap}button.pri{background:var(--g);color:#06140a;border-color:var(--g);font-weight:750}#ch{flex:1;width:30px;min-height:42px}#login{max-width:100px;overflow:hidden;text-overflow:ellipsis;min-height:42px}#cfg{min-height:42px}
-#stage{width:100%;height:22dvh;flex:0 0 22dvh;min-height:90px;max-height:22dvh;background:#000;display:grid;place-items:center;color:var(--mut);overflow:hidden}#stage iframe{width:100%;height:100%;border:0;display:block}
-#chat{position:relative;flex:1 1 0;min-height:0;min-width:0;background:#000;overflow:hidden;border-top:1px solid var(--line);padding:0}#chat iframe{width:100%;height:calc(100% + 132px);border:0;display:block}
-footer{position:relative;left:auto;right:auto;bottom:auto;flex:0 0 auto;width:100%;min-width:0;border-top:1px solid var(--line);padding:6px 8px calc(10px + env(safe-area-inset-bottom));display:grid;align-content:end;gap:6px;background:#080a0b;z-index:20;margin:0}
-#st{min-height:0;padding:0 2px;color:var(--mut);font-size:11px;line-height:1.2;max-height:16px;overflow:hidden}#emo{display:none;gap:5px;overflow-x:auto}#emo.open{display:flex}
-#macros{display:flex;gap:7px;overflow-x:auto;min-width:0;scrollbar-width:none;padding:1px 0}#macros button{flex:0 0 auto;min-width:40px;min-height:34px;padding:5px 10px;font-size:13px;border-radius:9px;background:#171a1c}
-.row{display:flex;gap:6px;align-items:center;min-width:0}#msg{flex:1;width:0;min-height:44px;border-radius:14px}#send{min-height:44px;padding:8px 13px}.ib{padding:7px 10px;min-height:44px}
-#emoteQuick{display:flex;gap:6px;overflow-x:auto;min-width:0;padding:2px 0;scrollbar-width:none}#emoteQuick button{flex:0 0 auto;min-width:48px;min-height:42px;padding:4px 7px;font-size:12px;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:4px}#emoteQuick img{width:32px;height:32px;object-fit:contain;display:block}#emoteQuick .emote-fallback{font-weight:650}#emoteQuick button:active{transform:scale(.96)}#repeatbar{display:flex;gap:6px;align-items:center;min-width:0;overflow-x:auto;padding:1px 0;scrollbar-width:none}#repeatbar select,#repeatbar button{font-size:12px;padding:6px 9px;min-height:32px;border-radius:9px}#repeatbar select{flex:0 0 auto;max-width:126px}#repeatStart{background:#1b2b19;border-color:#365b32;color:#c6ffb1}#repeatStop{background:#321919;border-color:#633333;color:#ffb2b2}#countdown{font-variant-numeric:tabular-nums;color:var(--g);font-size:11px;min-width:34px;text-align:center}
+:root{--bg:#050607;--panel:#151719;--line:#292d30;--tx:#f4f5f6;--mut:#9ba1a6;--g:#53fc18;--r:12px;--pad:10px;--h:44px;--chat-crop:132px;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:14px/1.35 system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
+body{position:fixed;inset:0;height:var(--app-vh,100dvh);display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 0;min-width:0;min-height:0}
+input,button,select,textarea{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:0 12px;min-width:0;height:var(--h)}
+textarea{height:auto;padding:8px}
+input:focus,button:focus-visible,select:focus-visible{outline:2px solid var(--g);outline-offset:1px}
+button{cursor:pointer;touch-action:manipulation;white-space:nowrap}
+button:disabled{opacity:.45;cursor:default}
+button.pri{background:var(--g);color:#06140a;border-color:var(--g);font-weight:750}
+
+/* header: one tidy grid row */
+header{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto auto;align-items:center;gap:8px;padding:8px var(--pad);border-bottom:1px solid var(--line);background:#090b0c;z-index:2}
+header b{color:var(--g);font-size:16px;white-space:nowrap}
+#ch{width:100%}
+#login{max-width:104px;overflow:hidden;text-overflow:ellipsis}
+#cfg{width:var(--h);padding:0}
+
+/* player: true 16:9, full width */
+#stage{width:100%;aspect-ratio:16/9;max-height:calc(var(--app-vh,100dvh)*.3);flex:0 0 auto;background:#000;display:grid;place-items:center;color:var(--mut);overflow:hidden;text-align:center;padding:0 12px}
+#stage iframe{width:100%;height:100%;border:0;display:block}
+
+/* chat */
+#chat{position:relative;flex:1 1 0;min-height:0;min-width:0;background:#000;overflow:hidden;border-top:1px solid var(--line)}
+#chat iframe{position:absolute;top:0;left:0;width:100%;height:calc(100% + var(--chat-crop));border:0;display:block}
+
+/* footer: consistent 10px gutters, 8px rhythm */
+footer{position:relative;flex:0 0 auto;width:100%;min-width:0;border-top:1px solid var(--line);padding:8px var(--pad) calc(8px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;background:#080a0b;z-index:20}
+#st{color:var(--mut);font-size:12px;line-height:1.2;max-height:16px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#st:empty{display:none}
+#emo{display:none;gap:6px;overflow-x:auto;scrollbar-width:none}#emo.open{display:flex}#emo button{height:38px;padding:0 10px}
+
+/* horizontal scrollers run edge to edge but start aligned with the gutter */
+#macros,#emoteQuick{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 calc(var(--pad)*-1);padding:0 var(--pad);scroll-padding:0 var(--pad);-webkit-overflow-scrolling:touch}
+#macros::-webkit-scrollbar,#emoteQuick::-webkit-scrollbar{display:none}
+#macros:empty{display:none}
+#macros button{flex:0 0 auto;height:36px;padding:0 12px;font-size:13px;border-radius:10px;background:#171a1c}
+#emoteQuick button{flex:0 0 auto;min-width:46px;height:46px;padding:0 6px;font-size:12px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#171a1c}
+#emoteQuick img{height:34px;width:auto;max-width:72px;min-width:28px;object-fit:contain;display:block;pointer-events:none;-webkit-user-drag:none}
+#emoteQuick .emote-fallback{font-weight:650;padding:0 4px}
+#emoteQuick button:active{transform:scale(.94);border-color:var(--g)}
+
+/* repeat bar: one row, no sideways scrolling */
+#repeatbar{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:8px;align-items:center}
+#repeatbar select,#repeatbar button{height:38px;font-size:13px;padding:0 10px;border-radius:10px}
+#repeatStart{background:#1b2b19;border-color:#365b32;color:#c6ffb1;font-variant-numeric:tabular-nums}
+#repeatStop{background:#321919;border-color:#633333;color:#ffb2b2}
+
+/* composer */
+.row{display:flex;gap:8px;align-items:center;min-width:0}
+#composer{display:grid;grid-template-columns:var(--h) minmax(0,1fr) var(--h) auto;gap:8px;align-items:center}
+#composer .ib{width:var(--h);padding:0;font-size:18px}
+#msg{width:100%;border-radius:14px}
+#send{padding:0 18px}
+
 dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:14px;width:min(440px,94vw);max-height:85dvh;overflow:auto}dialog::backdrop{background:#000a}dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}dialog input,dialog select{color:var(--tx)}dialog p{color:var(--mut);font-size:13px;margin:6px 0}
-@media(max-width:520px){header b{display:none}header{gap:5px;padding:6px}header button{padding:8px 9px}#login{max-width:92px}#stage{height:19dvh;flex-basis:19dvh;max-height:19dvh;min-height:82px}footer{gap:4px;padding:4px 6px calc(6px + env(safe-area-inset-bottom));margin:0;width:100%}#emoteQuick button{font-size:11px;min-height:30px;padding:3px 7px}#repeatbar select{max-width:118px}#msg{min-height:42px}#send{padding:7px 11px}}
-@media(min-width:860px){footer{position:relative;width:auto;padding-bottom:6px}body{display:grid;grid-template-columns:minmax(0,1fr) 390px;grid-template-rows:auto minmax(0,1fr) auto}#stage{grid-column:1;grid-row:2/4;height:100%;max-height:none;flex:none}#chat{grid-column:2;grid-row:2;min-height:0;flex:none}footer{grid-column:2;grid-row:3;flex:none}}
+
+@media(max-width:520px){header b{display:none}header{grid-template-columns:minmax(0,1fr) auto auto auto}}
+@media(min-width:860px){
+ body{display:grid;grid-template-columns:minmax(0,1fr) 390px;grid-template-rows:auto minmax(0,1fr) auto}
+ header{grid-column:1/3}
+ #stage{grid-column:1;grid-row:2/4;height:100%;max-height:none;aspect-ratio:auto}
+ #chat{grid-column:2;grid-row:2}
+ footer{grid-column:2;grid-row:3}
+}
 </style>
 </head>
 <body>
@@ -39,12 +89,11 @@ dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);bord
  <div id="emoteQuick" aria-label="Quick-send Kick emotes"></div>
  <div id="repeatbar" aria-label="Repeat message controls">
   <select id="repeatDuration" aria-label="Repeat duration"><option value="60">1 min</option><option value="300">5 min</option><option value="600">10 min</option></select>
-  <select id="repeatInterval" aria-label="Repeat interval"><option value="1">Every 1 sec</option><option value="2">Every 2 sec</option><option value="3">Every 3 sec</option><option value="5" selected>Every 5 sec</option><option value="10">Every 10 sec</option><option value="15">Every 15 sec</option><option value="30">Every 30 sec</option><option value="60">Every 1 min</option></select>
+  <select id="repeatInterval" aria-label="Repeat interval"><option value="1">Every 1s</option><option value="2">Every 2s</option><option value="3">Every 3s</option><option value="5" selected>Every 5s</option><option value="10">Every 10s</option><option value="15">Every 15s</option><option value="30">Every 30s</option><option value="60">Every 1m</option></select>
   <button id="repeatStart" type="button">Start repeat</button>
   <button id="repeatStop" type="button" disabled>Stop</button>
-  <span id="countdown" aria-live="off">Ready</span>
  </div>
- <div class="row">
+ <div id="composer">
   <button id="idbtn" class="ib" aria-label="Chat identity">🛡</button>
   <input id="msg" placeholder="Send a message" maxlength="500" autocomplete="off" enterkeyhint="send">
   <button id="emobtn" class="ib" aria-label="Emoji">😀</button>
@@ -76,6 +125,9 @@ dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);bord
  </label>
  <label>Chat text size
   <input id="fs" type="range" min="12" max="22" value="15">
+ </label>
+ <label>Quick-send emotes (one per line: NAME, or NAME:KickEmoteID, or NAME:imageURL)
+  <textarea id="qe" rows="5" placeholder="KEKW:37226&#10;LUL&#10;PogU" style="color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit"></textarea>
  </label>
  <label>Quick-send phrases (one per line)
   <textarea id="mac" rows="4" style="color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit"></textarea>
@@ -119,7 +171,6 @@ const randColor=()=>`hsl(${Math.floor(Math.random()*360)} 85% 65%)`;
 // Player
 function watch(name){
  channel=name.trim().toLowerCase();if(!channel)return;
- emoteImages.clear();
  if(typeof stopRepeat==='function')stopRepeat();
  $('#stage').innerHTML='';
  const f=document.createElement('iframe');
@@ -127,8 +178,8 @@ function watch(name){
  f.allow='autoplay; fullscreen; picture-in-picture';f.allowFullscreen=true;
  $('#stage').append(f);
  S.channel=channel;save();
- connect();
- loadEmoteImages();
+ renderQuickEmotes();
+ connect().then(loadEmoteImages);
 }
 
 // Chat: Kick's own chat page, so it keeps working when Kick changes its backend
@@ -179,7 +230,7 @@ async function send(text, options={}){
 let repeatTimer=null,repeatEnd=0,repeatNext=0,repeatActive=false,repeatBusy=false;
 function stopRepeat(){
  repeatActive=false;repeatBusy=false;if(repeatTimer){clearInterval(repeatTimer);repeatTimer=null}
- $('#repeatStart').disabled=false;$('#repeatStop').disabled=true;$('#countdown').textContent='Ready';
+ $('#repeatStart').disabled=false;$('#repeatStart').textContent='Start repeat';$('#repeatStop').disabled=true;
 }
 function startRepeat(){
  const message=$('#msg').value.trim();
@@ -203,9 +254,8 @@ function startRepeat(){
    repeatNext=Date.now()+interval*1000;
   }
   const left=Math.max(0,Math.ceil((Math.min(repeatNext,repeatEnd)-Date.now())/1000));
-  $('#countdown').textContent=left+'s';
+  $('#repeatStart').textContent='Repeating '+left+'s';
  };
- $('#countdown').textContent='0s';
  repeatTimer=setInterval(tick,250);tick();
 }
 $('#repeatStart').addEventListener('click',startRepeat);
@@ -219,15 +269,15 @@ $('#msg').onkeydown=e=>{if(e.key==='Enter')send($('#msg').value)};
 $('#cfg').onclick=()=>{
  $('#bid').value=S.bid||'';$('#rid').value=S.rid||'';
  $('#colmode').value=S.colmode||'rand';$('#hl').value=S.hl||'';$('#mute').value=S.mute||'';
- $('#fs').value=S.fs||15;$('#mac').value=(S.mac||['gg','LUL','W stream']).join('\n');
+ $('#qe').value=(S.qe&&S.qe.length?S.qe:DEFAULT_EMOTES).join('\n');$('#fs').value=S.fs||15;$('#mac').value=(S.mac||['gg','LUL','W stream']).join('\n');
  $('#dlg').showModal();
 };
 $('#close').onclick=()=>{
  S.bid=$('#bid').value.trim();
  const nr=$('#rid').value.trim();const ridChanged=nr&&nr!==S.rid;S.rid=nr;
  S.colmode=$('#colmode').value;S.hl=$('#hl').value;S.mute=$('#mute').value;
- S.fs=$('#fs').value;S.mac=$('#mac').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12);
- save();applyPrefs();$('#dlg').close();
+ S.fs=$('#fs').value;S.qe=$('#qe').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,24);S.mac=$('#mac').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12);
+ save();applyPrefs();$('#dlg').close();loadEmoteImages();
  
 };
 function applyPrefs(){
@@ -237,36 +287,91 @@ function applyPrefs(){
   const b=document.createElement('button');b.textContent=t;b.onclick=()=>send(t);box.append(b);
  });
  }
-// Quick-send emotes: resolve real Kick and 7TV image URLs. Animated GIF/WebP
-// URLs are used directly, so the browser plays the animation in the picker.
+// Quick-send emotes. Image sources, in priority order:
+//  1) your own NAME:KickEmoteID / NAME:URL lines in Settings
+//  2) Kick channel + global emotes (if Kick lets the browser/your server fetch them)
+//  3) 7TV channel set (looked up by Kick user id), 7TV global set
+//  4) 7TV exact-name search (cached) for anything still missing
+// Animated WebP/GIF play directly inside the <img>.
 const DEFAULT_EMOTES=['KEKW','LUL','PogU','PepeLaugh','Sadge','GIGACHAD','catJAM','Kappa'];
-const emoteImages=new Map();
-function emoteImage(code){return emoteImages.get(code)||''}
+const emoteImages=new Map(); // name -> {url, kick}
+const kickUrl=id=>`https://files.kick.com/emotes/${id}/fullsize`;
+const sevenUrl=id=>`https://cdn.7tv.app/emote/${id}/2x.webp`;
+function qeEntries(){
+ return (S.qe&&S.qe.length?S.qe:DEFAULT_EMOTES).map(l=>{
+  const i=l.indexOf(':');if(i<1)return{name:l.trim()};
+  const name=l.slice(0,i).trim(),v=l.slice(i+1).trim();
+  if(/^\d+$/.test(v))return{name,url:kickUrl(v),kick:v};
+  if(/^https?:/.test(v))return{name,url:v};
+  return{name};
+ }).filter(e=>e.name);
+}
+const emoteNames=()=>qeEntries().map(e=>e.name);
+function putEmote(name,url,kick){if(name&&url&&!emoteImages.has(name))emoteImages.set(name,{url,kick:kick||null})}
+function seedEmotes(){
+ emoteImages.clear();
+ qeEntries().forEach(e=>e.url&&putEmote(e.name,e.url,e.kick));
+ const c=S.ec||{};for(const n in c)putEmote(n,c[n]);
+}
 function addKickEmotes(data){
- const lists=[data?.emotes,data?.data?.emotes,data?.data?.channel,data?.data?.global,data?.channel,data?.global,data?.emoji];
- for(const arr of lists){if(!Array.isArray(arr))continue;for(const e of arr){
-  const name=e.name||e.code;const url=e.image_url||e.url||(e.id?`https://files.kick.com/emotes/${e.id}/fullsize`:'' );
-  if(name&&url&&!emoteImages.has(name))emoteImages.set(name,url);
+ if(!data)return;
+ const groups=[];
+ if(Array.isArray(data))groups.push(...data.map(g=>g&&g.emotes));
+ groups.push(data.emotes,data.data?.emotes,data.data?.channel,data.data?.global,data.channel,data.global,data.emoji);
+ for(const arr of groups){if(!Array.isArray(arr))continue;for(const e of arr){
+  const name=e&&(e.name||e.code);const id=e&&e.id;
+  if(name&&id)putEmote(name,kickUrl(id),String(id));
+  else if(name&&e.image_url)putEmote(name,e.image_url);
  }}
 }
+function addSeven(list){for(const e of (list||[])){if(e&&e.name&&e.id)putEmote(e.name,sevenUrl(e.id))}}
+const getJSON=async u=>{try{const r=await fetch(u,{credentials:'omit'});if(!r.ok)return null;return await r.json()}catch(e){return null}};
+async function search7tv(name){
+ try{
+  const r=await fetch('https://7tv.io/v3/gql',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'query($q:String!){emotes(query:$q,page:1,limit:20,filter:{exact_match:true,case_sensitive:true}){items{id name}}}',variables:{q:name}})});
+  const j=await r.json();const it=(j&&j.data&&j.data.emotes&&j.data.emotes.items)||[];
+  const m=it.find(x=>x.name===name);return m?sevenUrl(m.id):null;
+ }catch(e){return null}
+}
 async function loadEmoteImages(){
- // Kick's website emote endpoint supplies channel and global Kick emotes.
- if(channel){try{const r=await fetch('https://kick.com/api/v2/emotes/'+encodeURIComponent(channel),{credentials:'omit'});if(r.ok)addKickEmotes(await r.json())}catch(e){}}
- // 7TV global set supplements the channel's native emotes; 2x WebP retains animation.
- try{const r=await fetch('https://7tv.io/v3/emote-sets/global');if(r.ok){const j=await r.json();for(const e of (j.emotes||[])){
-  const name=e.name,id=e.id;if(name&&id&&!emoteImages.has(name))emoteImages.set(name,`https://cdn.7tv.app/emote/${id}/2x.webp`);
- }}}catch(e){}
+ seedEmotes();renderQuickEmotes();
+ const slug=encodeURIComponent(channel||'');
+ const [mine,kick,sevenCh,sevenGl]=await Promise.all([
+  channel?getJSON('/api/emotes?slug='+slug):null,
+  channel?getJSON('https://kick.com/emotes/'+slug):null,
+  S.bid?getJSON('https://7tv.io/v3/users/kick/'+encodeURIComponent(S.bid)):null,
+  getJSON('https://7tv.io/v3/emote-sets/global')
+ ]);
+ addKickEmotes(mine);addKickEmotes(kick);
+ addSeven(sevenCh&&sevenCh.emote_set&&sevenCh.emote_set.emotes);
+ addSeven(sevenGl&&sevenGl.emotes);
  renderQuickEmotes();
+ const missing=emoteNames().filter(n=>!emoteImages.has(n));
+ if(missing.length){
+  const found=await Promise.all(missing.map(search7tv));
+  S.ec=S.ec||{};
+  missing.forEach((n,i)=>{if(found[i]){putEmote(n,found[i]);S.ec[n]=found[i]}});
+  save();renderQuickEmotes();
+ }
 }
 function renderQuickEmotes(){
  const box=$('#emoteQuick');if(!box)return;box.innerHTML='';
- const recent=S.recentEmotes||[];
- const list=[...recent,...DEFAULT_EMOTES.filter(x=>!recent.includes(x))];
- list.forEach(code=>{const b=document.createElement('button');b.type='button';b.title='Send '+code;b.setAttribute('aria-label','Send '+code);
-  const url=emoteImage(code);
-  if(url){const img=document.createElement('img');img.src=url;img.alt=code;img.loading='lazy';img.onerror=()=>{img.remove();const t=document.createElement('span');t.className='emote-fallback';t.textContent=code;b.append(t)};b.append(img)}
-  else{const t=document.createElement('span');t.className='emote-fallback';t.textContent=code;b.append(t)}
-  b.onclick=async()=>{const ok=await send(code);if(ok){S.recentEmotes=[code,...recent.filter(x=>x!==code)].slice(0,12);save();renderQuickEmotes()}};
+ const names=emoteNames();
+ const recent=(S.recentEmotes||[]).filter(n=>names.includes(n)||emoteImages.has(n));
+ const list=[...recent,...names.filter(x=>!recent.includes(x))];
+ list.forEach(code=>{
+  const b=document.createElement('button');b.type='button';b.title='Send '+code;b.setAttribute('aria-label','Send '+code);
+  const em=emoteImages.get(code);
+  const fallback=()=>{const t=document.createElement('span');t.className='emote-fallback';t.textContent=code;b.append(t)};
+  if(em){const img=document.createElement('img');img.alt=code;img.decoding='async';img.draggable=false;img.onerror=()=>{img.remove();fallback()};img.src=em.url;b.append(img)}
+  else fallback();
+  b.onclick=async()=>{
+   const cur=emoteImages.get(code);
+   // Kick only renders its own emotes when sent in [emote:ID:NAME] form
+   const text=cur&&cur.kick?`[emote:${cur.kick}:${code}]`:code;
+   const ok=await send(text);
+   if(ok){const r=S.recentEmotes||[];S.recentEmotes=[code,...r.filter(x=>x!==code)].slice(0,12);save();renderQuickEmotes()}
+  };
   box.append(b);
  });
 }
