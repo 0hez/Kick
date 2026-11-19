@@ -117,7 +117,7 @@ http.createServer(async (req, res) => {
     }
     if (u.pathname === '/') {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      return res.end(fs.readFileSync(path.join(__dirname, 'public', 'index.html')));
+      return res.end(fs.readFileSync(path.join(__dirname, 'index.html')));
     }
     res.writeHead(404); res.end();
   } catch (e) {
