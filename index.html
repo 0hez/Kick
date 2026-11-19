@@ -7,10 +7,11 @@
 <style>
 :root{--bg:#050607;--panel:#151719;--line:#292d30;--tx:#f4f5f6;--mut:#9ba1a6;--g:#53fc18;--r:12px;--pad:10px;--h:44px;--chat-crop:132px;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:14px/1.35 system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
-body{position:fixed;inset:0;height:var(--app-vh,100dvh);display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 0;min-width:0;min-height:0}
+html,body{height:100%;overscroll-behavior:none;margin:0;background:var(--bg);color:var(--tx);font:14px/1.35 system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
+body{position:fixed;top:var(--app-top,0px);left:0;right:0;height:var(--app-vh,100dvh);display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 0;min-width:0;min-height:0}
 input,button,select,textarea{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:0 12px;min-width:0;height:var(--h)}
 textarea{height:auto;padding:8px}
+#msg,#ch,dialog input,dialog textarea{font-size:16px}
 input:focus,button:focus-visible,select:focus-visible{outline:2px solid var(--g);outline-offset:1px}
 button{cursor:pointer;touch-action:manipulation;white-space:nowrap}
 button:disabled{opacity:.45;cursor:default}
@@ -45,6 +46,7 @@ footer{position:relative;flex:0 0 auto;width:100%;min-width:0;border-top:1px sol
 #emoteQuick button{flex:0 0 auto;min-width:46px;height:46px;padding:0 6px;font-size:12px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#171a1c}
 #emoteQuick img{height:34px;width:auto;max-width:72px;min-width:28px;object-fit:contain;display:block;pointer-events:none;-webkit-user-drag:none}
 #emoteQuick .emote-fallback{font-weight:650;padding:0 4px}
+#emoteQuick button.noid{border-style:dashed;border-color:#4a4f54}
 #emoteQuick button:active{transform:scale(.94);border-color:var(--g)}
 
 /* repeat bar: one row, no sideways scrolling */
@@ -62,6 +64,10 @@ footer{position:relative;flex:0 0 auto;width:100%;min-width:0;border-top:1px sol
 
 dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:14px;width:min(440px,94vw);max-height:85dvh;overflow:auto}dialog::backdrop{background:#000a}dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}dialog input,dialog select{color:var(--tx)}dialog p{color:var(--mut);font-size:13px;margin:6px 0}
 
+@media(max-width:859px){
+ html.kb #stage,html.kb #emoteQuick,html.kb #macros,html.kb #repeatbar,html.kb #st{display:none}
+ html.kb footer{padding-bottom:8px}
+}
 @media(max-width:520px){header b{display:none}header{grid-template-columns:minmax(0,1fr) auto auto auto}}
 @media(min-width:860px){
  body{display:grid;grid-template-columns:minmax(0,1fr) 390px;grid-template-rows:auto minmax(0,1fr) auto}
@@ -147,16 +153,32 @@ dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);bord
 </dialog>
 
 <script>
+let vpBase=0,vpRaf=0;
 const syncViewport=()=>{
- const vv=window.visualViewport;
- if(vv) document.documentElement.style.setProperty('--app-vh',vv.height+'px');
- else document.documentElement.style.setProperty('--app-vh',window.innerHeight+'px');
+ cancelAnimationFrame(vpRaf);
+ vpRaf=requestAnimationFrame(()=>{
+  const vv=window.visualViewport,root=document.documentElement;
+  const h=Math.round(vv?vv.height:window.innerHeight);
+  const top=Math.round(vv?vv.offsetTop:0);
+  const typing=/^(INPUT|TEXTAREA)$/.test((document.activeElement||{}).tagName||'');
+  vpBase=typing?Math.max(vpBase,h):h;
+  const kb=typing&&vpBase-h>120;
+  root.classList.toggle('kb',kb);
+  root.style.setProperty('--app-vh',h+'px');
+  root.style.setProperty('--app-top',top+'px');
+  if(window.scrollY||window.scrollX)window.scrollTo(0,0);
+ });
 };
 syncViewport();
 window.addEventListener('resize',syncViewport,{passive:true});
-if(window.visualViewport) window.visualViewport.addEventListener('resize',syncViewport,{passive:true});
+window.addEventListener('orientationchange',()=>{vpBase=0;setTimeout(syncViewport,300)});
+window.addEventListener('scroll',syncViewport,{passive:true});
+if(window.visualViewport){visualViewport.addEventListener('resize',syncViewport,{passive:true});visualViewport.addEventListener('scroll',syncViewport,{passive:true})}
+document.addEventListener('focusin',()=>{syncViewport();setTimeout(syncViewport,150);setTimeout(syncViewport,400)});
+document.addEventListener('focusout',()=>{setTimeout(syncViewport,50);setTimeout(syncViewport,350)});
 
 const $=s=>document.querySelector(s);
+['#send','#emobtn','#idbtn'].forEach(id=>{const el=document.querySelector(id);if(el)el.addEventListener('mousedown',e=>e.preventDefault())});
 const S=(()=>{try{return JSON.parse(localStorage.getItem('kd')||'{}')}catch(e){return{}}})();
 const save=()=>{try{localStorage.setItem('kd',JSON.stringify(S))}catch(e){}};
 const csv=v=>(v||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
@@ -220,7 +242,7 @@ async function send(text, options={}){
    if(!r.ok){if(!options.silent)sys('Send failed ('+r.status+').');return false}
    if(S.colmode==='fixed'){S.col=S.col||randColor();save()}
    const col=S.colmode==='fixed'?S.col:randColor();
-   if(!options.repeat){line(user.name,col,text);$('#msg').value='';$('#msg').focus()}
+   if(!options.repeat){line(user.name,col,text);$('#msg').value='';$('#msg').focus({preventScroll:true})}
    return true;
   }catch(e){if(!options.silent)sys('Send blocked by the browser or network. Try again or check your token.');return false}
  }
@@ -354,6 +376,14 @@ async function loadEmoteImages(){
   save();renderQuickEmotes();
  }
 }
+function parseKickId(v){const m=String(v).match(/emote:(\d+)/)||String(v).match(/emotes\/(\d+)/)||String(v).match(/^\s*(\d+)\s*$/);return m?m[1]:null}
+function setKickId(name,id){
+ const lines=(S.qe&&S.qe.length?S.qe:DEFAULT_EMOTES).slice();
+ const i=lines.findIndex(l=>l.split(':')[0].trim()===name);
+ if(i>=0)lines[i]=name+':'+id;else lines.push(name+':'+id);
+ S.qe=lines;save();
+ emoteImages.set(name,{url:kickUrl(id),kick:id});
+}
 function renderQuickEmotes(){
  const box=$('#emoteQuick');if(!box)return;box.innerHTML='';
  const names=emoteNames();
@@ -365,12 +395,20 @@ function renderQuickEmotes(){
   const fallback=()=>{const t=document.createElement('span');t.className='emote-fallback';t.textContent=code;b.append(t)};
   if(em){const img=document.createElement('img');img.alt=code;img.decoding='async';img.draggable=false;img.onerror=()=>{img.remove();fallback()};img.src=em.url;b.append(img)}
   else fallback();
+  if(!(em&&em.kick))b.classList.add('noid');
   b.onclick=async()=>{
-   const cur=emoteImages.get(code);
-   // Kick only renders its own emotes when sent in [emote:ID:NAME] form
-   const text=cur&&cur.kick?`[emote:${cur.kick}:${code}]`:code;
-   const ok=await send(text);
+   let kid=(emoteImages.get(code)||{}).kick;
+   if(!kid){
+    // Kick only turns text into an emote when it is sent as [emote:ID:NAME]
+    const v=prompt('To send '+code+' as a real Kick emote, paste its Kick emote ID (the number in files.kick.com/emotes/ID/...). Cancel to do nothing.');
+    if(v===null)return;
+    kid=parseKickId(v);
+    if(!kid){sys('Could not find an emote ID in that.');return}
+    setKickId(code,kid);
+   }
+   const ok=await send(`[emote:${kid}:${code}]`);
    if(ok){const r=S.recentEmotes||[];S.recentEmotes=[code,...r.filter(x=>x!==code)].slice(0,12);save();renderQuickEmotes()}
+   else renderQuickEmotes();
   };
   box.append(b);
  });
@@ -390,7 +428,7 @@ $('#idbtn').onclick=()=>{
 };
 $('#rnd').onclick=()=>{S.colmode='rand';save();sys('Random color every message')};
 $('#iclose').onclick=()=>$('#idlg').close();
-['😂','🔥','💀','❤️','👏','😭','🙏','👀','🫡','💯'].forEach(e=>{const b=document.createElement('button');b.textContent=e;b.style.padding='4px 9px';b.onclick=()=>{$('#msg').value+=e;$('#msg').focus()};$('#emo').append(b)});
+['😂','🔥','💀','❤️','👏','😭','🙏','👀','🫡','💯'].forEach(e=>{const b=document.createElement('button');b.textContent=e;b.style.padding='4px 9px';b.onclick=()=>{$('#msg').value+=e;$('#msg').focus({preventScroll:true})};$('#emo').append(b)});
 $('#emobtn').onclick=()=>$('#emo').classList.toggle('open');
 
 applyPrefs();
