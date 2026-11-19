@@ -8,7 +8,7 @@
 :root{--bg:#0b0e0f;--panel:#141a1c;--line:#222c2f;--tx:#e8eeee;--mut:#7f9094;--g:#53fc18;--r:10px;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,Segoe UI,sans-serif}
-body{display:grid;grid-template-rows:auto auto 1fr auto;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+body{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 header{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--line);align-items:center}
 header b{color:var(--g);font-size:17px;letter-spacing:.3px}
 input,button,select{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:9px 11px;min-width:0}
@@ -18,7 +18,10 @@ button.pri{background:var(--g);color:#06140a;border-color:var(--g);font-weight:7
 #ch{flex:1}
 #stage{aspect-ratio:16/9;max-height:42vh;width:100%;background:#000;display:grid;place-items:center;color:var(--mut)}
 #stage iframe{width:100%;height:100%;border:0}
-#chat{overflow-y:auto;padding:8px;overscroll-behavior:contain}
+#chat{overflow:hidden;min-height:0;background:#000}
+#chat iframe{width:100%;height:100%;border:0;display:block}
+footer,#macros{min-width:0}
+#st{min-height:20px;padding:0 2px}
 .m{padding:3px 0;word-break:break-word}
 .m .u{font-weight:700}
 .m.me{background:#15221a;border-radius:6px;padding:3px 6px}
@@ -53,8 +56,9 @@ dialog p{color:var(--mut);font-size:13px;margin:6px 0}
  <button id="cfg" aria-label="Settings">⚙</button>
 </header>
 <div id="stage">Enter a channel to start watching</div>
-<div id="chat" aria-live="polite"><button id="jump">New messages ↓</button></div>
+<div id="chat" aria-live="polite"></div>
 <footer>
+ <div id="st" class="sys">Chat above is Kick's own chat. Messages you send here appear in it.</div>
  <div id="macros"></div>
  <div class="row">
   <input id="msg" placeholder="Send a message" maxlength="500" autocomplete="off">
@@ -102,24 +106,10 @@ const save=()=>{try{localStorage.setItem('kd',JSON.stringify(S))}catch(e){}};
 const csv=v=>(v||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
 let ws,channel,lastSend=0,pinned=true;
 
-const chat=$('#chat'),jump=$('#jump');
-chat.addEventListener('scroll',()=>{pinned=chat.scrollHeight-chat.scrollTop-chat.clientHeight<40;if(pinned)jump.style.display='none'});
-jump.onclick=()=>{chat.scrollTop=chat.scrollHeight};
-
-function sys(t){const d=document.createElement('div');d.className='sys';d.textContent=t;add(d)}
-function add(el){
- chat.insertBefore(el,jump);
- while(chat.children.length>301)chat.removeChild(chat.firstChild);
- if(pinned)chat.scrollTop=chat.scrollHeight;else jump.style.display='block';
-}
-function line(name,color,text,cls){
- const d=document.createElement('div');d.className='m '+(cls||'');
- const u=document.createElement('span');u.className='u';u.style.color=color||'#9fb';u.textContent=name;
- d.append(u,': ',text);
- const lower=text.toLowerCase();
- if(!cls&&csv(S.hl).some(w=>lower.includes(w)))d.classList.add('hl');
- add(d);
-}
+const chat=$('#chat');
+function sys(t){const e=$('#st');e.style.color='';e.textContent=t}
+function clearSt(){$('#st').textContent=''}
+function line(name,color,text){const e=$('#st');e.textContent='';const u=document.createElement('b');u.style.color=color;u.textContent=name;e.append(u,': '+text)}
 const randColor=()=>`hsl(${Math.floor(Math.random()*360)} 85% 65%)`;
 
 // Player
@@ -134,43 +124,17 @@ function watch(name){
  connect();
 }
 
-// Chat read
+// Chat: Kick's own chat page, so it keeps working when Kick changes its backend
 async function connect(){
- if(ws){ws.onclose=null;ws.close()}
- chat.querySelectorAll('.m,.sys').forEach(n=>n.remove());
- sys('Looking up #'+channel+'…');
- let rid=null;
+ chat.innerHTML='';
+ const f=document.createElement('iframe');
+ f.src='https://kick.com/popout/'+encodeURIComponent(channel)+'/chat';
+ chat.append(f);
  try{
   const r=await fetch('/api/channel?slug='+encodeURIComponent(channel));
   const j=await r.json();
-  rid=j.rid;
-  if(j.bid){S.bid=String(j.bid)}
+  if(j.bid){S.bid=String(j.bid);save()}
  }catch(e){}
- if(!rid&&S.rid&&S.lastCh===channel)rid=S.rid;
- if(!rid){sys('Could not look up the chatroom automatically. Open ⚙ and enter the chatroom ID for this channel.');return}
- S.rid=String(rid);S.lastCh=channel;save();
- openSocket(rid);
-}
-function openSocket(rid){
- ws=new WebSocket('wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false');
- ws.onmessage=ev=>{
-  let m;try{m=JSON.parse(ev.data)}catch(e){return}
-  if(m.event==='pusher:connection_established'){
-   ws.send(JSON.stringify({event:'pusher:subscribe',data:{auth:'',channel:'chatrooms.'+rid+'.v2'}}));
-  }else if(m.event==='pusher_internal:subscription_succeeded'){
-   sys('Connected to #'+channel+' chat');
-  }else if(m.event==='pusher:ping'){
-   ws.send(JSON.stringify({event:'pusher:pong',data:{}}));
-  }else if(m.event&&m.event.endsWith('ChatMessageEvent')){
-   let d;try{d=JSON.parse(m.data)}catch(e){return}
-   const text=d.content||'';
-   const clean=text.replace(/\[emote:\d+:([^\]]+)\]/g,'$1');
-   if(csv(S.mute).some(w=>clean.toLowerCase().includes(w)))return;
-   const s=d.sender||{};
-   line(s.username||'?',s.identity&&s.identity.color,clean);
-  }
- };
- ws.onclose=()=>{sys('Chat disconnected. Reconnecting…');setTimeout(()=>channel&&openSocket(rid),3000)};
 }
 
 // Send
@@ -187,7 +151,7 @@ async function send(text){
   if(!r.ok){sys('Send failed ('+r.status+').');return}
   if(S.colmode==='fixed'){S.col=S.col||randColor();save()}
   const col=S.colmode==='fixed'?S.col:randColor();
-  line('you',col,text,'me');
+  line(user.name,col,text);
   $('#msg').value='';
  }catch(e){sys('Send blocked by the browser or network. Try again or check your token.')}
 }
@@ -209,7 +173,7 @@ $('#close').onclick=()=>{
  S.colmode=$('#colmode').value;S.hl=$('#hl').value;S.mute=$('#mute').value;
  S.fs=$('#fs').value;S.mac=$('#mac').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12);
  save();applyPrefs();$('#dlg').close();
- if(ridChanged&&channel){S.lastCh=channel;save();if(ws){ws.onclose=null;ws.close()}openSocket(nr)}
+ 
 };
 function applyPrefs(){
  chat.style.fontSize=(S.fs||15)+'px';
