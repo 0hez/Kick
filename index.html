@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KickDeck</title>
+<style>
+:root{--bg:#0b0e0f;--panel:#141a1c;--line:#222c2f;--tx:#e8eeee;--mut:#7f9094;--g:#53fc18;--r:10px;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,Segoe UI,sans-serif}
+body{display:grid;grid-template-rows:auto auto 1fr auto;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--line);align-items:center}
+header b{color:var(--g);font-size:17px;letter-spacing:.3px}
+input,button,select{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:9px 11px;min-width:0}
+input:focus,button:focus-visible{outline:2px solid var(--g);outline-offset:1px}
+button{cursor:pointer}
+button.pri{background:var(--g);color:#06140a;border-color:var(--g);font-weight:700}
+#ch{flex:1}
+#stage{aspect-ratio:16/9;max-height:42vh;width:100%;background:#000;display:grid;place-items:center;color:var(--mut)}
+#stage iframe{width:100%;height:100%;border:0}
+#chat{overflow-y:auto;padding:8px;overscroll-behavior:contain}
+.m{padding:3px 0;word-break:break-word}
+.m .u{font-weight:700}
+.m.me{background:#15221a;border-radius:6px;padding:3px 6px}
+.m.hl{background:#2a2410;border-radius:6px;padding:3px 6px}
+.sys{color:var(--mut);font-size:13px;padding:3px 0}
+#jump{display:none;margin:0 auto;position:sticky;bottom:4px}
+footer{border-top:1px solid var(--line);padding:8px;display:grid;gap:6px;background:var(--bg)}
+#macros{display:flex;gap:6px;overflow-x:auto}
+#macros button{white-space:nowrap;padding:5px 10px;font-size:13px}
+.row{display:flex;gap:6px}
+#msg{flex:1}
+dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:14px;width:min(440px,94vw)}
+dialog::backdrop{background:#000a}
+dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}
+dialog input,dialog select{color:var(--tx)}
+dialog p{color:var(--mut);font-size:13px;margin:6px 0}
+@media(min-width:860px){
+ body{grid-template-columns:1fr 380px;grid-template-rows:auto 1fr auto}
+ header{grid-column:1/3}
+ #stage{grid-row:2/4;max-height:none;aspect-ratio:auto;height:100%}
+ #chat{grid-column:2;grid-row:2}
+ footer{grid-column:2;grid-row:3}
+}
+</style>
+</head>
+<body>
+<header>
+ <b>KickDeck</b>
+ <input id="ch" placeholder="channel name" autocapitalize="none" autocomplete="off">
+ <button id="go" class="pri">Watch</button>
+ <button id="login" class="pri">Log in</button>
+ <button id="cfg" aria-label="Settings">⚙</button>
+</header>
+<div id="stage">Enter a channel to start watching</div>
+<div id="chat" aria-live="polite"><button id="jump">New messages ↓</button></div>
+<footer>
+ <div id="macros"></div>
+ <div class="row">
+  <input id="msg" placeholder="Send a message" maxlength="500" autocomplete="off">
+  <button id="send" class="pri">Send</button>
+ </div>
+</footer>
+
+<dialog id="dlg">
+ <h3 style="margin:0">Settings</h3>
+ <p id="acct">Not logged in.</p>
+ <div class="row"><button id="logout">Log out</button></div>
+ <label>Broadcaster user ID (auto-filled if lookup works)
+  <input id="bid" inputmode="numeric" placeholder="e.g. 123456">
+ </label>
+ <label>Chatroom ID (auto-filled if lookup works)
+  <input id="rid" inputmode="numeric" placeholder="e.g. 654321">
+ </label>
+ <label>Your message colors
+  <select id="colmode">
+   <option value="rand">New random color every message</option>
+   <option value="fixed">One fixed color</option>
+  </select>
+ </label>
+ <label>Highlight words (comma separated)
+  <input id="hl" placeholder="your name, giveaway">
+ </label>
+ <label>Hide messages containing (comma separated)
+  <input id="mute" placeholder="word1, word2">
+ </label>
+ <label>Chat text size
+  <input id="fs" type="range" min="12" max="22" value="15">
+ </label>
+ <label>Quick-send phrases (one per line)
+  <textarea id="mac" rows="4" style="color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit"></textarea>
+ </label>
+ <div class="row" style="justify-content:flex-end">
+  <button id="close" class="pri">Save</button>
+ </div>
+</dialog>
+
+<script>
+const $=s=>document.querySelector(s);
+const S=(()=>{try{return JSON.parse(localStorage.getItem('kd')||'{}')}catch(e){return{}}})();
+const save=()=>{try{localStorage.setItem('kd',JSON.stringify(S))}catch(e){}};
+const csv=v=>(v||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
+let ws,channel,lastSend=0,pinned=true;
+
+const chat=$('#chat'),jump=$('#jump');
+chat.addEventListener('scroll',()=>{pinned=chat.scrollHeight-chat.scrollTop-chat.clientHeight<40;if(pinned)jump.style.display='none'});
+jump.onclick=()=>{chat.scrollTop=chat.scrollHeight};
+
+function sys(t){const d=document.createElement('div');d.className='sys';d.textContent=t;add(d)}
+function add(el){
+ chat.insertBefore(el,jump);
+ while(chat.children.length>301)chat.removeChild(chat.firstChild);
+ if(pinned)chat.scrollTop=chat.scrollHeight;else jump.style.display='block';
+}
+function line(name,color,text,cls){
+ const d=document.createElement('div');d.className='m '+(cls||'');
+ const u=document.createElement('span');u.className='u';u.style.color=color||'#9fb';u.textContent=name;
+ d.append(u,': ',text);
+ const lower=text.toLowerCase();
+ if(!cls&&csv(S.hl).some(w=>lower.includes(w)))d.classList.add('hl');
+ add(d);
+}
+const randColor=()=>`hsl(${Math.floor(Math.random()*360)} 85% 65%)`;
+
+// Player
+function watch(name){
+ channel=name.trim().toLowerCase();if(!channel)return;
+ $('#stage').innerHTML='';
+ const f=document.createElement('iframe');
+ f.src='https://player.kick.com/'+encodeURIComponent(channel);
+ f.allow='autoplay; fullscreen; picture-in-picture';f.allowFullscreen=true;
+ $('#stage').append(f);
+ S.channel=channel;save();
+ connect();
+}
+
+// Chat read
+async function connect(){
+ if(ws){ws.onclose=null;ws.close()}
+ chat.querySelectorAll('.m,.sys').forEach(n=>n.remove());
+ sys('Looking up #'+channel+'…');
+ let rid=null;
+ try{
+  const r=await fetch('/api/channel?slug='+encodeURIComponent(channel));
+  const j=await r.json();
+  rid=j.rid;
+  if(j.bid){S.bid=String(j.bid)}
+ }catch(e){}
+ if(!rid&&S.rid&&S.lastCh===channel)rid=S.rid;
+ if(!rid){sys('Could not look up the chatroom automatically. Open ⚙ and enter the chatroom ID for this channel.');return}
+ S.rid=String(rid);S.lastCh=channel;save();
+ openSocket(rid);
+}
+function openSocket(rid){
+ ws=new WebSocket('wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false');
+ ws.onmessage=ev=>{
+  let m;try{m=JSON.parse(ev.data)}catch(e){return}
+  if(m.event==='pusher:connection_established'){
+   ws.send(JSON.stringify({event:'pusher:subscribe',data:{auth:'',channel:'chatrooms.'+rid+'.v2'}}));
+  }else if(m.event==='pusher_internal:subscription_succeeded'){
+   sys('Connected to #'+channel+' chat');
+  }else if(m.event==='pusher:ping'){
+   ws.send(JSON.stringify({event:'pusher:pong',data:{}}));
+  }else if(m.event&&m.event.endsWith('ChatMessageEvent')){
+   let d;try{d=JSON.parse(m.data)}catch(e){return}
+   const text=d.content||'';
+   const clean=text.replace(/\[emote:\d+:([^\]]+)\]/g,'$1');
+   if(csv(S.mute).some(w=>clean.toLowerCase().includes(w)))return;
+   const s=d.sender||{};
+   line(s.username||'?',s.identity&&s.identity.color,clean);
+  }
+ };
+ ws.onclose=()=>{sys('Chat disconnected. Reconnecting…');setTimeout(()=>channel&&openSocket(rid),3000)};
+}
+
+// Send
+async function send(text){
+ text=(text||'').trim();if(!text)return;
+ if(!user){sys('Log in to send messages.');return}
+ if(!S.bid){sys('Could not find this channel yet.');return}
+ const wait=1500-(Date.now()-lastSend);
+ if(wait>0){sys('Slow down a little.');return}
+ lastSend=Date.now();
+ try{
+  const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({broadcaster_user_id:Number(S.bid),content:text})});
+  if(r.status===401){user=null;showUser();sys('Session expired. Log in again.');return}
+  if(!r.ok){sys('Send failed ('+r.status+').');return}
+  if(S.colmode==='fixed'){S.col=S.col||randColor();save()}
+  const col=S.colmode==='fixed'?S.col:randColor();
+  line('you',col,text,'me');
+  $('#msg').value='';
+ }catch(e){sys('Send blocked by the browser or network. Try again or check your token.')}
+}
+
+// UI wiring
+$('#go').onclick=()=>watch($('#ch').value);
+$('#ch').onkeydown=e=>{if(e.key==='Enter')watch($('#ch').value)};
+$('#send').onclick=()=>send($('#msg').value);
+$('#msg').onkeydown=e=>{if(e.key==='Enter')send($('#msg').value)};
+$('#cfg').onclick=()=>{
+ $('#bid').value=S.bid||'';$('#rid').value=S.rid||'';
+ $('#colmode').value=S.colmode||'rand';$('#hl').value=S.hl||'';$('#mute').value=S.mute||'';
+ $('#fs').value=S.fs||15;$('#mac').value=(S.mac||['gg','LUL','W stream']).join('\n');
+ $('#dlg').showModal();
+};
+$('#close').onclick=()=>{
+ S.bid=$('#bid').value.trim();
+ const nr=$('#rid').value.trim();const ridChanged=nr&&nr!==S.rid;S.rid=nr;
+ S.colmode=$('#colmode').value;S.hl=$('#hl').value;S.mute=$('#mute').value;
+ S.fs=$('#fs').value;S.mac=$('#mac').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12);
+ save();applyPrefs();$('#dlg').close();
+ if(ridChanged&&channel){S.lastCh=channel;save();if(ws){ws.onclose=null;ws.close()}openSocket(nr)}
+};
+function applyPrefs(){
+ chat.style.fontSize=(S.fs||15)+'px';
+ const box=$('#macros');box.innerHTML='';
+ (S.mac||['gg','LUL','W stream']).forEach(t=>{
+  const b=document.createElement('button');b.textContent=t;b.onclick=()=>send(t);box.append(b);
+ });
+}
+let user=null;
+function showUser(){$('#login').textContent=user?user.name:'Log in';$('#login').className=user?'':'pri';$('#acct').textContent=user?'Logged in as '+user.name:'Not logged in.'}
+$('#login').onclick=()=>{if(!user)location.href='/auth/login'};
+$('#logout').onclick=()=>{location.href='/auth/logout'};
+fetch('/api/me').then(r=>r.ok?r.json():null).then(j=>{user=j;showUser()}).catch(()=>{});
+applyPrefs();
+if(S.channel){$('#ch').value=S.channel;watch(S.channel)}
+</script>
+</body>
+</html>
