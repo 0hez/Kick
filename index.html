@@ -11,15 +11,15 @@ body{position:fixed;inset:0;height:var(--app-vh,100dvh);display:flex;flex-direct
 header{display:flex;align-items:center;gap:6px;padding:7px 9px;border-bottom:1px solid var(--line);min-width:0;background:#090b0c;z-index:2}
 header b{color:var(--g);font-size:16px;white-space:nowrap}input,button,select{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;min-width:0}input:focus,button:focus-visible,select:focus-visible{outline:2px solid var(--g);outline-offset:1px}button{cursor:pointer;touch-action:manipulation;white-space:nowrap}button.pri{background:var(--g);color:#06140a;border-color:var(--g);font-weight:750}#ch{flex:1;width:30px;min-height:42px}#login{max-width:100px;overflow:hidden;text-overflow:ellipsis;min-height:42px}#cfg{min-height:42px}
 #stage{width:100%;height:22dvh;flex:0 0 22dvh;min-height:90px;max-height:22dvh;background:#000;display:grid;place-items:center;color:var(--mut);overflow:hidden}#stage iframe{width:100%;height:100%;border:0;display:block}
-#chat{flex:1 1 0;min-height:0;min-width:0;background:#000;overflow:hidden;border-top:1px solid var(--line);padding-bottom:0}#chat iframe{width:100%;height:calc(100% + 132px);border:0;display:block}
-footer{position:fixed;left:0;right:0;bottom:0;flex:none;width:100%;min-width:0;border-top:1px solid var(--line);padding:6px 8px calc(10px + env(safe-area-inset-bottom));display:grid;align-content:end;gap:6px;background:#080a0b;z-index:20;margin:0}
+#chat{position:relative;flex:1 1 0;min-height:0;min-width:0;background:#000;overflow:hidden;border-top:1px solid var(--line);padding:0}#chat iframe{width:100%;height:calc(100% + 132px);border:0;display:block}
+footer{position:relative;left:auto;right:auto;bottom:auto;flex:0 0 auto;width:100%;min-width:0;border-top:1px solid var(--line);padding:6px 8px calc(10px + env(safe-area-inset-bottom));display:grid;align-content:end;gap:6px;background:#080a0b;z-index:20;margin:0}
 #st{min-height:0;padding:0 2px;color:var(--mut);font-size:11px;line-height:1.2;max-height:16px;overflow:hidden}#emo{display:none;gap:5px;overflow-x:auto}#emo.open{display:flex}
 #macros{display:flex;gap:7px;overflow-x:auto;min-width:0;scrollbar-width:none;padding:1px 0}#macros button{flex:0 0 auto;min-width:40px;min-height:34px;padding:5px 10px;font-size:13px;border-radius:9px;background:#171a1c}
 .row{display:flex;gap:6px;align-items:center;min-width:0}#msg{flex:1;width:0;min-height:44px;border-radius:14px}#send{min-height:44px;padding:8px 13px}.ib{padding:7px 10px;min-height:44px}
-#emoteQuick{display:flex;gap:6px;overflow-x:auto;min-width:0;padding:2px 0;scrollbar-width:none}#emoteQuick button{flex:0 0 auto;min-width:38px;min-height:34px;padding:4px 9px;font-size:13px;border-radius:9px}#repeatbar{display:flex;gap:6px;align-items:center;min-width:0;overflow-x:auto;padding:1px 0;scrollbar-width:none}#repeatbar select,#repeatbar button{font-size:12px;padding:6px 9px;min-height:32px;border-radius:9px}#repeatbar select{flex:0 0 auto;max-width:126px}#repeatStart{background:#1b2b19;border-color:#365b32;color:#c6ffb1}#repeatStop{background:#321919;border-color:#633333;color:#ffb2b2}#countdown{font-variant-numeric:tabular-nums;color:var(--g);font-size:11px;min-width:34px;text-align:center}
+#emoteQuick{display:flex;gap:6px;overflow-x:auto;min-width:0;padding:2px 0;scrollbar-width:none}#emoteQuick button{flex:0 0 auto;min-width:48px;min-height:42px;padding:4px 7px;font-size:12px;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:4px}#emoteQuick img{width:32px;height:32px;object-fit:contain;display:block}#emoteQuick .emote-fallback{font-weight:650}#emoteQuick button:active{transform:scale(.96)}#repeatbar{display:flex;gap:6px;align-items:center;min-width:0;overflow-x:auto;padding:1px 0;scrollbar-width:none}#repeatbar select,#repeatbar button{font-size:12px;padding:6px 9px;min-height:32px;border-radius:9px}#repeatbar select{flex:0 0 auto;max-width:126px}#repeatStart{background:#1b2b19;border-color:#365b32;color:#c6ffb1}#repeatStop{background:#321919;border-color:#633333;color:#ffb2b2}#countdown{font-variant-numeric:tabular-nums;color:var(--g);font-size:11px;min-width:34px;text-align:center}
 dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:14px;width:min(440px,94vw);max-height:85dvh;overflow:auto}dialog::backdrop{background:#000a}dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}dialog input,dialog select{color:var(--tx)}dialog p{color:var(--mut);font-size:13px;margin:6px 0}
 @media(max-width:520px){header b{display:none}header{gap:5px;padding:6px}header button{padding:8px 9px}#login{max-width:92px}#stage{height:19dvh;flex-basis:19dvh;max-height:19dvh;min-height:82px}footer{gap:4px;padding:4px 6px calc(6px + env(safe-area-inset-bottom));margin:0;width:100%}#emoteQuick button{font-size:11px;min-height:30px;padding:3px 7px}#repeatbar select{max-width:118px}#msg{min-height:42px}#send{padding:7px 11px}}
-@media(min-width:860px){footer{position:static;width:auto;padding-bottom:6px}body{display:grid;grid-template-columns:minmax(0,1fr) 390px;grid-template-rows:auto minmax(0,1fr) auto}#stage{grid-column:1;grid-row:2/4;height:100%;max-height:none;flex:none}#chat{grid-column:2;grid-row:2;min-height:0;flex:none}footer{grid-column:2;grid-row:3;flex:none}}
+@media(min-width:860px){footer{position:relative;width:auto;padding-bottom:6px}body{display:grid;grid-template-columns:minmax(0,1fr) 390px;grid-template-rows:auto minmax(0,1fr) auto}#stage{grid-column:1;grid-row:2/4;height:100%;max-height:none;flex:none}#chat{grid-column:2;grid-row:2;min-height:0;flex:none}footer{grid-column:2;grid-row:3;flex:none}}
 </style>
 </head>
 <body>
@@ -119,6 +119,7 @@ const randColor=()=>`hsl(${Math.floor(Math.random()*360)} 85% 65%)`;
 // Player
 function watch(name){
  channel=name.trim().toLowerCase();if(!channel)return;
+ emoteImages.clear();
  if(typeof stopRepeat==='function')stopRepeat();
  $('#stage').innerHTML='';
  const f=document.createElement('iframe');
@@ -127,6 +128,7 @@ function watch(name){
  $('#stage').append(f);
  S.channel=channel;save();
  connect();
+ loadEmoteImages();
 }
 
 // Chat: Kick's own chat page, so it keeps working when Kick changes its backend
@@ -235,14 +237,38 @@ function applyPrefs(){
   const b=document.createElement('button');b.textContent=t;b.onclick=()=>send(t);box.append(b);
  });
  }
-// Quick-send emote codes; newest selected emote is kept first across visits.
+// Quick-send emotes: resolve real Kick and 7TV image URLs. Animated GIF/WebP
+// URLs are used directly, so the browser plays the animation in the picker.
 const DEFAULT_EMOTES=['KEKW','LUL','PogU','PepeLaugh','Sadge','GIGACHAD','catJAM','Kappa'];
+const emoteImages=new Map();
+function emoteImage(code){return emoteImages.get(code)||''}
+function addKickEmotes(data){
+ const lists=[data?.emotes,data?.data?.emotes,data?.data?.channel,data?.data?.global,data?.channel,data?.global,data?.emoji];
+ for(const arr of lists){if(!Array.isArray(arr))continue;for(const e of arr){
+  const name=e.name||e.code;const url=e.image_url||e.url||(e.id?`https://files.kick.com/emotes/${e.id}/fullsize`:'' );
+  if(name&&url&&!emoteImages.has(name))emoteImages.set(name,url);
+ }}
+}
+async function loadEmoteImages(){
+ // Kick's website emote endpoint supplies channel and global Kick emotes.
+ if(channel){try{const r=await fetch('https://kick.com/api/v2/emotes/'+encodeURIComponent(channel),{credentials:'omit'});if(r.ok)addKickEmotes(await r.json())}catch(e){}}
+ // 7TV global set supplements the channel's native emotes; 2x WebP retains animation.
+ try{const r=await fetch('https://7tv.io/v3/emote-sets/global');if(r.ok){const j=await r.json();for(const e of (j.emotes||[])){
+  const name=e.name,id=e.id;if(name&&id&&!emoteImages.has(name))emoteImages.set(name,`https://cdn.7tv.app/emote/${id}/2x.webp`);
+ }}}catch(e){}
+ renderQuickEmotes();
+}
 function renderQuickEmotes(){
  const box=$('#emoteQuick');if(!box)return;box.innerHTML='';
- const list=[...(S.recentEmotes||[]),...DEFAULT_EMOTES.filter(x=>!(S.recentEmotes||[]).includes(x))];
- list.forEach(code=>{const b=document.createElement('button');b.type='button';b.textContent=code;b.title='Send '+code;b.onclick=async()=>{
-  const ok=await send(code);if(ok){S.recentEmotes=[code,...(S.recentEmotes||[]).filter(x=>x!==code)].slice(0,12);save();renderQuickEmotes()}
- };box.append(b)});
+ const recent=S.recentEmotes||[];
+ const list=[...recent,...DEFAULT_EMOTES.filter(x=>!recent.includes(x))];
+ list.forEach(code=>{const b=document.createElement('button');b.type='button';b.title='Send '+code;b.setAttribute('aria-label','Send '+code);
+  const url=emoteImage(code);
+  if(url){const img=document.createElement('img');img.src=url;img.alt=code;img.loading='lazy';img.onerror=()=>{img.remove();const t=document.createElement('span');t.className='emote-fallback';t.textContent=code;b.append(t)};b.append(img)}
+  else{const t=document.createElement('span');t.className='emote-fallback';t.textContent=code;b.append(t)}
+  b.onclick=async()=>{const ok=await send(code);if(ok){S.recentEmotes=[code,...recent.filter(x=>x!==code)].slice(0,12);save();renderQuickEmotes()}};
+  box.append(b);
+ });
 }
 let user=null;
 function showUser(){$('#login').textContent=user?user.name:'Log in';$('#login').className=user?'':'pri';$('#acct').textContent=user?'Logged in as '+user.name:'Not logged in.'}
