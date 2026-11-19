@@ -5,57 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>KickDeck</title>
 <style>
-:root{--bg:#0b0e0f;--panel:#141a1c;--line:#222c2f;--tx:#e8eeee;--mut:#7f9094;--g:#53fc18;--r:10px;color-scheme:dark}
+:root{--bg:#0b0e0f;--panel:#141a1c;--line:#222c2f;--tx:#e8eeee;--mut:#91a0a3;--g:#53fc18;--r:12px;color-scheme:dark}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,Segoe UI,sans-serif}
-body{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
-header{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--line);align-items:center}
-header b{color:var(--g);font-size:17px;letter-spacing:.3px}
-input,button,select{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:9px 11px;min-width:0}
-input:focus,button:focus-visible{outline:2px solid var(--g);outline-offset:1px}
-button{cursor:pointer}
-button.pri{background:var(--g);color:#06140a;border-color:var(--g);font-weight:700}
-#ch{flex:1}
-#stage{aspect-ratio:16/9;max-height:42vh;width:100%;background:#000;display:grid;place-items:center;color:var(--mut)}
-#stage iframe{width:100%;height:100%;border:0}
-#chat{overflow:hidden;min-height:0;background:#000}
-#chat iframe{width:100%;height:calc(100% + var(--clip,120px));border:0;display:block}
-footer,#macros{min-width:0}
-#st{min-height:20px;padding:0 2px}
-.m{padding:3px 0;word-break:break-word}
-.m .u{font-weight:700}
-.m.me{background:#15221a;border-radius:6px;padding:3px 6px}
-.m.hl{background:#2a2410;border-radius:6px;padding:3px 6px}
-.sys{color:var(--mut);font-size:13px;padding:3px 0}
-#jump{display:none;margin:0 auto;position:sticky;bottom:4px}
-footer{border-top:1px solid var(--line);padding:8px;display:grid;grid-template-columns:minmax(0,1fr);gap:6px;background:var(--bg)}
-#macros{display:flex;gap:6px;overflow-x:auto}
-#macros button{white-space:nowrap;padding:5px 10px;font-size:13px}
-.row{display:flex;gap:6px}
-#msg{flex:1}
-dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:14px;width:min(440px,94vw)}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:14px/1.35 system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
+body{height:100vh;height:100dvh;display:grid;grid-template-rows:auto minmax(110px,30dvh) minmax(0,1fr) auto;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);gap:0}
+header{display:flex;align-items:center;gap:6px;padding:7px 9px;border-bottom:1px solid var(--line);min-width:0;background:#0e1213;z-index:2}
+header b{color:var(--g);font-size:16px;letter-spacing:.3px;white-space:nowrap}
+input,button,select{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;min-width:0}
+input:focus,button:focus-visible,select:focus-visible{outline:2px solid var(--g);outline-offset:1px}
+button{cursor:pointer;touch-action:manipulation;white-space:nowrap}
+button.pri{background:var(--g);color:#06140a;border-color:var(--g);font-weight:750}
+#ch{flex:1;width:30px}
+#login{max-width:112px;overflow:hidden;text-overflow:ellipsis}
+#stage{width:100%;height:100%;min-height:0;background:#000;display:grid;place-items:center;color:var(--mut);overflow:hidden}
+#stage iframe{width:100%;height:100%;border:0;display:block}
+#chat{min-height:0;min-width:0;background:#000;overflow:hidden;border-top:1px solid var(--line)}
+#chat iframe{width:100%;height:100%;border:0;display:block}
+footer{min-width:0;border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom));display:grid;gap:5px;background:#0e1213;z-index:2}
+#st{min-height:0;padding:0 2px;color:var(--mut);font-size:11px;line-height:1.2;max-height:24px;overflow:hidden}
+#emo{display:none;gap:4px;overflow-x:auto}#emo.open{display:flex}
+#macros{display:flex;gap:5px;overflow-x:auto;min-width:0;scrollbar-width:thin}
+#macros button{white-space:nowrap;padding:5px 8px;font-size:12px;border-radius:9px}
+.row{display:flex;gap:5px;align-items:center;min-width:0}
+#msg{flex:1;width:0;min-height:40px}
+.ib{padding:7px 9px;min-height:40px}
+#repeatbar{display:flex;gap:5px;align-items:center;min-width:0;overflow-x:auto;padding:1px 0}
+#repeatbar select,#repeatbar button{font-size:12px;padding:6px 8px;min-height:32px;border-radius:9px}
+#repeatbar select{flex:0 0 auto;max-width:140px}
+#repeatStart{background:#1c2a1c;border-color:#365b32;color:#b9ff9d}
+#repeatStop{background:#321919;border-color:#633333;color:#ffb2b2}
+#countdown{font-variant-numeric:tabular-nums;color:var(--g);font-size:12px;min-width:42px;text-align:center}
+dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:14px;width:min(440px,94vw);max-height:85dvh;overflow:auto}
 dialog::backdrop{background:#000a}
 dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}
-dialog input,dialog select{color:var(--tx)}
-dialog p{color:var(--mut);font-size:13px;margin:6px 0}
-header{gap:4px}
-header button{padding:9px 10px}
-#login{max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#msg{width:0}
-#emo{display:none;gap:6px;overflow-x:auto}
-#emo.open{display:flex}
-#repeatPanel{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-#repeatPanel select,#repeatPanel button{padding:7px 9px}
-#repeatState{color:var(--mut);font-size:12px}
-.ib{padding:9px 11px}
-@media(max-width:520px){header b{display:none}}
-@media(min-width:860px){
- body{grid-template-columns:1fr 380px;grid-template-rows:auto 1fr auto}
- header{grid-column:1/3}
- #stage{grid-row:2/4;max-height:none;aspect-ratio:auto;height:100%}
- #chat{grid-column:2;grid-row:2}
- footer{grid-column:2;grid-row:3}
-}
+dialog input,dialog select{color:var(--tx)}dialog p{color:var(--mut);font-size:13px;margin:6px 0}
+@media(max-width:520px){header b{display:none}header{gap:5px;padding:6px}header button{padding:8px 9px}#login{max-width:90px}body{grid-template-rows:auto minmax(105px,27dvh) minmax(0,1fr) auto}footer{gap:4px;padding:5px 6px calc(5px + env(safe-area-inset-bottom))}#repeatbar select{max-width:122px}#send{padding:8px 10px}}
+@media(min-width:860px){body{grid-template-columns:minmax(0,1fr) 390px;grid-template-rows:auto minmax(0,1fr) auto}header{grid-column:1/3}#stage{grid-column:1;grid-row:2/4;height:100%;max-height:none}#chat{grid-column:2;grid-row:2;min-height:0}footer{grid-column:2;grid-row:3}}
 </style>
 </head>
 <body>
@@ -69,22 +54,15 @@ header button{padding:9px 10px}
 <div id="stage">Enter a channel to start watching</div>
 <div id="chat" aria-live="polite"></div>
 <footer>
- <div id="st" class="sys">Chat above is Kick's own chat. Messages you send here appear in it.</div>
+ <div id="st" class="sys" aria-live="polite"></div>
  <div id="emo"></div>
  <div id="macros"></div>
- <div id="repeatPanel" class="row">
-  <select id="repeatDuration" aria-label="Repeat duration">
-   <option value="60000">1 minute</option>
-   <option value="300000">5 minutes</option>
-  </select>
-  <select id="repeatInterval" aria-label="Repeat interval">
-   <option value="30000">Every 30 seconds</option>
-   <option value="60000">Every 1 minute</option>
-   <option value="120000">Every 2 minutes</option>
-  </select>
-  <button id="repeatToggle" type="button">Start repeat</button>
+ <div id="repeatbar" aria-label="Repeat message controls">
+  <select id="repeatDuration" aria-label="Repeat duration"><option value="60">1 min</option><option value="300">5 min</option><option value="600">10 min</option></select>
+  <select id="repeatInterval" aria-label="Repeat interval"><option value="5" selected>Every 5s</option><option value="10">Every 10s</option><option value="30">Every 30s</option><option value="60">Every 1m</option></select>
+  <button id="repeatStart" type="button">Start repeat</button>
   <button id="repeatStop" type="button" disabled>Stop</button>
-  <span id="repeatState" aria-live="off"></span>
+  <span id="countdown" aria-live="off">Ready</span>
  </div>
  <div class="row">
   <button id="idbtn" class="ib" aria-label="Chat identity">🛡</button>
@@ -115,9 +93,6 @@ header button{padding:9px 10px}
  </label>
  <label>Hide messages containing (comma separated)
   <input id="mute" placeholder="word1, word2">
- </label>
- <label>Hide Kick's own message box (px, 0 = show it)
-  <input id="clip" type="range" min="0" max="220" value="120">
  </label>
  <label>Chat text size
   <input id="fs" type="range" min="12" max="22" value="15">
@@ -155,6 +130,7 @@ const randColor=()=>`hsl(${Math.floor(Math.random()*360)} 85% 65%)`;
 // Player
 function watch(name){
  channel=name.trim().toLowerCase();if(!channel)return;
+ if(typeof stopRepeat==='function')stopRepeat();
  $('#stage').innerHTML='';
  const f=document.createElement('iframe');
  f.src='https://player.kick.com/'+encodeURIComponent(channel);
@@ -178,57 +154,59 @@ async function connect(){
 }
 
 // Send
-async function send(text){
- text=(text||'').trim();if(!text)return;
- if(!user){sys('Log in to send messages.');return}
- if(!S.bid){sys('Could not find this channel yet.');return}
+async function send(text, options={}){
+ text=(text||'').trim();if(!text)return false;
+ if(!user){if(!options.silent)sys('Log in to send messages.');return false}
+ if(!S.bid){if(!options.silent)sys('Could not find this channel yet.');return false}
  const wait=1500-(Date.now()-lastSend);
- if(wait>0){sys('Slow down a little.');return}
+ if(wait>0){if(!options.silent)sys('Please wait for the send cooldown.');return false}
  lastSend=Date.now();
  try{
   const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({broadcaster_user_id:Number(S.bid),content:text})});
-  if(r.status===401){user=null;showUser();sys('Session expired. Log in again.');return false}
-  if(!r.ok){sys('Send failed ('+r.status+').');return false}
+  if(r.status===401){user=null;showUser();if(!options.silent)sys('Session expired. Log in again.');return false}
+  if(!r.ok){if(!options.silent)sys('Send failed ('+r.status+').');return false}
   if(S.colmode==='fixed'){S.col=S.col||randColor();save()}
   const col=S.colmode==='fixed'?S.col:randColor();
-  line(user.name,col,text);
-  $('#msg').value='';$('#msg').focus();
+  if(!options.repeat){line(user.name,col,text);$('#msg').value='';$('#msg').focus()}
   return true;
- }catch(e){sys('Send blocked by the browser or network. Try again or check your token.');return false}
+ }catch(e){if(!options.silent)sys('Send blocked by the browser or network. Try again or check your token.');return false}
 }
 
-
-// Repeat sender: sends only at the selected interval and can be stopped at any time.
-let repeatTimer=null, repeatEnd=0, repeatBusy=false;
+// Repeat sender: sends immediately, then repeats at the selected interval.
+let repeatTimer=null,repeatEnd=0,repeatNext=0,repeatActive=false,repeatBusy=false;
 function stopRepeat(){
- if(repeatTimer!==null)clearTimeout(repeatTimer);
- repeatTimer=null;repeatEnd=0;repeatBusy=false;
- $('#repeatToggle').disabled=false;$('#repeatStop').disabled=true;
- $('#repeatState').textContent='';
+ repeatActive=false;repeatBusy=false;if(repeatTimer){clearInterval(repeatTimer);repeatTimer=null}
+ $('#repeatStart').disabled=false;$('#repeatStop').disabled=true;$('#countdown').textContent='Ready';
 }
-async function repeatTick(message,interval){
- if(repeatBusy)return;
- if(Date.now()>=repeatEnd){stopRepeat();return}
- repeatBusy=true;
- const ok=await send(message);
- repeatBusy=false;
- if(!ok){stopRepeat();return}
- const remaining=repeatEnd-Date.now();
- if(remaining<=0){stopRepeat();return}
- repeatTimer=setTimeout(()=>repeatTick(message,interval),Math.min(interval,remaining));
-}
-$('#repeatToggle').onclick=()=>{
+function startRepeat(){
  const message=$('#msg').value.trim();
- if(!message||!user||!S.bid){sys('Enter a message, log in, and load a channel first.');return}
- if(repeatTimer!==null||repeatBusy)return;
- const duration=Number($('#repeatDuration').value);
- const interval=Number($('#repeatInterval').value);
- repeatEnd=Date.now()+duration;
- $('#repeatToggle').disabled=true;$('#repeatStop').disabled=false;
- $('#repeatState').textContent='Repeating…';
- repeatTick(message,interval);
-};
-$('#repeatStop').onclick=stopRepeat;
+ if(!message){sys('Enter a message first.');return}
+ if(!user){sys('Log in to send messages.');return}
+ if(!S.bid){sys('Choose a channel and wait for its chat details to load.');return}
+ stopRepeat();repeatActive=true;
+ const duration=Number($('#repeatDuration').value)||60;
+ const interval=Math.max(5,Number($('#repeatInterval').value)||5);
+ repeatEnd=Date.now()+duration*1000;repeatNext=Date.now();
+ $('#repeatStart').disabled=true;$('#repeatStop').disabled=false;
+ const tick=async()=>{
+  if(!repeatActive)return;
+  const now=Date.now();
+  if(now>=repeatEnd){stopRepeat();return}
+  if(now>=repeatNext&&!repeatBusy){
+   repeatBusy=true;
+   const ok=await send(message,{repeat:true,silent:true});
+   repeatBusy=false;
+   if(!ok){stopRepeat();sys('Repeat stopped because the message could not be sent.');return}
+   repeatNext=Date.now()+interval*1000;
+  }
+  const left=Math.max(0,Math.ceil((Math.min(repeatNext,repeatEnd)-Date.now())/1000));
+  $('#countdown').textContent=left+'s';
+ };
+ $('#countdown').textContent='0s';
+ repeatTimer=setInterval(tick,250);tick();
+}
+$('#repeatStart').addEventListener('click',startRepeat);
+$('#repeatStop').addEventListener('click',stopRepeat);
 
 // UI wiring
 $('#go').onclick=()=>watch($('#ch').value);
@@ -238,19 +216,19 @@ $('#msg').onkeydown=e=>{if(e.key==='Enter')send($('#msg').value)};
 $('#cfg').onclick=()=>{
  $('#bid').value=S.bid||'';$('#rid').value=S.rid||'';
  $('#colmode').value=S.colmode||'rand';$('#hl').value=S.hl||'';$('#mute').value=S.mute||'';
- $('#fs').value=S.fs||15;$('#clip').value=S.clip??120;$('#mac').value=(S.mac||['gg','LUL','W stream']).join('\n');
+ $('#fs').value=S.fs||15;$('#mac').value=(S.mac||['gg','LUL','W stream']).join('\n');
  $('#dlg').showModal();
 };
 $('#close').onclick=()=>{
  S.bid=$('#bid').value.trim();
  const nr=$('#rid').value.trim();const ridChanged=nr&&nr!==S.rid;S.rid=nr;
  S.colmode=$('#colmode').value;S.hl=$('#hl').value;S.mute=$('#mute').value;
- S.fs=$('#fs').value;S.clip=$('#clip').value;S.mac=$('#mac').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12);
+ S.fs=$('#fs').value;S.mac=$('#mac').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12);
  save();applyPrefs();$('#dlg').close();
  
 };
 function applyPrefs(){
- chat.style.fontSize=(S.fs||15)+'px';document.documentElement.style.setProperty('--clip',(S.clip??120)+'px');
+ chat.style.fontSize=(S.fs||15)+'px';
  const box=$('#macros');box.innerHTML='';
  (S.mac||['gg','LUL','W stream']).forEach(t=>{
   const b=document.createElement('button');b.textContent=t;b.onclick=()=>send(t);box.append(b);
@@ -259,7 +237,7 @@ function applyPrefs(){
 let user=null;
 function showUser(){$('#login').textContent=user?user.name:'Log in';$('#login').className=user?'':'pri';$('#acct').textContent=user?'Logged in as '+user.name:'Not logged in.'}
 $('#login').onclick=()=>{if(!user)location.href='/auth/login'};
-$('#logout').onclick=()=>{location.href='/auth/logout'};
+$('#logout').onclick=()=>{stopRepeat();location.href='/auth/logout'};
 fetch('/api/me').then(r=>r.ok?r.json():null).then(j=>{user=j;showUser()}).catch(()=>{});
 const COLS=['#ff6b6b','#ffa94d','#ffe066','#69db7c','#38d9a9','#4dabf7','#9775fa','#f783ac','#e8eeee'];
 $('#idbtn').onclick=()=>{
@@ -273,7 +251,7 @@ $('#rnd').onclick=()=>{S.colmode='rand';save();sys('Random color every message')
 $('#iclose').onclick=()=>$('#idlg').close();
 ['😂','🔥','💀','❤️','👏','😭','🙏','👀','🫡','💯'].forEach(e=>{const b=document.createElement('button');b.textContent=e;b.style.padding='4px 9px';b.onclick=()=>{$('#msg').value+=e;$('#msg').focus()};$('#emo').append(b)});
 $('#emobtn').onclick=()=>$('#emo').classList.toggle('open');
-['#send','#emobtn','#idbtn'].forEach(q=>$(q).addEventListener('mousedown',e=>e.preventDefault()));
+
 applyPrefs();
 if(S.channel){$('#ch').value=S.channel;watch(S.channel)}
 </script>
