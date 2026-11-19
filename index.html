@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>KickDeck</title>
 <style>
-:root{--bg:#050607;--panel:#151719;--line:#292d30;--tx:#f4f5f6;--mut:#9ba1a6;--g:#53fc18;--r:12px;--pad:10px;--h:44px;--chat-crop:132px;color-scheme:dark}
+:root{--bg:#050607;--panel:#151719;--line:#292d30;--tx:#f4f5f6;--mut:#9ba1a6;--g:#53fc18;--r:12px;--pad:8px;--h:38px;--chat-crop:132px;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overscroll-behavior:none;margin:0;background:var(--bg);color:var(--tx);font:14px/1.35 system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
 body{position:fixed;top:var(--app-top,0px);left:0;right:0;height:var(--app-vh,100dvh);display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 0;min-width:0;min-height:0}
@@ -30,43 +30,43 @@ header b{color:var(--g);font-size:16px;white-space:nowrap}
 
 /* chat */
 #chat{position:relative;flex:1 1 0;min-height:0;min-width:0;background:#000;overflow:hidden;border-top:1px solid var(--line)}
-#chat iframe{position:absolute;top:0;left:0;width:100%;height:calc(100% + var(--chat-crop));border:0;display:block}
+#chat iframe{position:absolute;left:0;bottom:calc(var(--chat-crop)*-1);width:100%;height:var(--chat-h,calc(100% + var(--chat-crop)));border:0;display:block}
 
 /* footer: consistent 10px gutters, 8px rhythm */
-footer{position:relative;flex:0 0 auto;width:100%;min-width:0;border-top:1px solid var(--line);padding:8px var(--pad) calc(8px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;background:#080a0b;z-index:20}
+footer{position:relative;flex:0 0 auto;width:100%;min-width:0;border-top:1px solid var(--line);padding:6px var(--pad) calc(6px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;background:#080a0b;z-index:20}
 #st{color:var(--mut);font-size:12px;line-height:1.2;max-height:16px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 #st:empty{display:none}
 #emo{display:none;gap:6px;overflow-x:auto;scrollbar-width:none}#emo.open{display:flex}#emo button{height:38px;padding:0 10px}
 
 /* horizontal scrollers run edge to edge but start aligned with the gutter */
-#macros,#emoteQuick{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 calc(var(--pad)*-1);padding:0 var(--pad);scroll-padding:0 var(--pad);-webkit-overflow-scrolling:touch}
+#macros,#emoteQuick{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 calc(var(--pad)*-1);padding:0 var(--pad);scroll-padding:0 var(--pad);-webkit-overflow-scrolling:touch}
 #macros::-webkit-scrollbar,#emoteQuick::-webkit-scrollbar{display:none}
 #macros:empty{display:none}
-#macros button{flex:0 0 auto;height:36px;padding:0 12px;font-size:13px;border-radius:10px;background:#171a1c}
-#emoteQuick button{flex:0 0 auto;min-width:46px;height:46px;padding:0 6px;font-size:12px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#171a1c}
-#emoteQuick img{height:34px;width:auto;max-width:72px;min-width:28px;object-fit:contain;display:block;pointer-events:none;-webkit-user-drag:none}
+#macros button{flex:0 0 auto;height:30px;padding:0 10px;font-size:12px;border-radius:10px;background:#171a1c}
+#emoteQuick button{flex:0 0 auto;min-width:38px;height:36px;padding:0 5px;font-size:12px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#171a1c}
+#emoteQuick img{height:26px;width:auto;max-width:56px;min-width:22px;object-fit:contain;display:block;pointer-events:none;-webkit-user-drag:none}
 #emoteQuick .emote-fallback{font-weight:650;padding:0 4px}
 #emoteQuick button.noid{border-style:dashed;border-color:#4a4f54}
 #emoteQuick button:active{transform:scale(.94);border-color:var(--g)}
 
 /* repeat bar: one row, no sideways scrolling */
-#repeatbar{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:8px;align-items:center}
-#repeatbar select,#repeatbar button{height:38px;font-size:13px;padding:0 10px;border-radius:10px}
+#repeatbar{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px;align-items:center}
+#repeatbar select,#repeatbar button{height:32px;font-size:12px;padding:0 8px;border-radius:9px}
 #repeatStart{background:#1b2b19;border-color:#365b32;color:#c6ffb1;font-variant-numeric:tabular-nums}
 #repeatStop{background:#321919;border-color:#633333;color:#ffb2b2}
 
 /* composer */
 .row{display:flex;gap:8px;align-items:center;min-width:0}
-#composer{display:grid;grid-template-columns:var(--h) minmax(0,1fr) var(--h) auto;gap:8px;align-items:center}
-#composer .ib{width:var(--h);padding:0;font-size:18px}
-#msg{width:100%;border-radius:14px}
-#send{padding:0 18px}
+#composer{display:grid;grid-template-columns:var(--h) minmax(0,1fr) var(--h) auto;gap:6px;align-items:center}
+#composer .ib{width:var(--h);padding:0;font-size:16px}
+#msg{width:100%;border-radius:12px;padding:0 10px}
+#send{padding:0 14px}
 
 dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:14px;width:min(440px,94vw);max-height:85dvh;overflow:auto}dialog::backdrop{background:#000a}dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}dialog input,dialog select{color:var(--tx)}dialog p{color:var(--mut);font-size:13px;margin:6px 0}
 
 @media(max-width:859px){
  html.kb #stage,html.kb #emoteQuick,html.kb #macros,html.kb #repeatbar,html.kb #st{display:none}
- html.kb footer{padding-bottom:8px}
+ html.kb footer{padding-bottom:6px}
 }
 @media(max-width:520px){header b{display:none}header{grid-template-columns:minmax(0,1fr) auto auto auto}}
 @media(min-width:860px){
@@ -184,10 +184,18 @@ const save=()=>{try{localStorage.setItem('kd',JSON.stringify(S))}catch(e){}};
 const csv=v=>(v||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
 let ws,channel,lastSend=0,pinned=true;
 
+
+// Keep the Kick chat frame a constant height, anchored to the bottom, so showing/hiding the keyboard,
+// status line or rows crops the OLD messages at the top instead of covering the newest at the bottom.
+let chatMax=0;
+if(window.ResizeObserver){
+ new ResizeObserver(es=>{const h=Math.round(es[0].contentRect.height);if(h>chatMax){chatMax=h;document.documentElement.style.setProperty('--chat-h',(chatMax+132)+'px')}}).observe($('#chat'));
+ window.addEventListener('orientationchange',()=>{setTimeout(()=>{chatMax=0},350)});
+}
 const chat=$('#chat');
 function sys(t){const e=$('#st');e.style.color='';e.textContent=t}
 function clearSt(){$('#st').textContent=''}
-function line(name,color,text){const e=$('#st');e.textContent='';const u=document.createElement('b');u.style.color=color;u.textContent=name;e.append(u,': '+text)}
+function line(){clearSt()}
 const randColor=()=>`hsl(${Math.floor(Math.random()*360)} 85% 65%)`;
 
 // Player
