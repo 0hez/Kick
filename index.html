@@ -19,7 +19,7 @@ button.pri{background:var(--g);color:#06140a;border-color:var(--g);font-weight:7
 #stage{aspect-ratio:16/9;max-height:42vh;width:100%;background:#000;display:grid;place-items:center;color:var(--mut)}
 #stage iframe{width:100%;height:100%;border:0}
 #chat{overflow:hidden;min-height:0;background:#000}
-#chat iframe{width:100%;height:100%;border:0;display:block}
+#chat iframe{width:100%;height:calc(100% + var(--clip,120px));border:0;display:block}
 footer,#macros{min-width:0}
 #st{min-height:20px;padding:0 2px}
 .m{padding:3px 0;word-break:break-word}
@@ -28,7 +28,7 @@ footer,#macros{min-width:0}
 .m.hl{background:#2a2410;border-radius:6px;padding:3px 6px}
 .sys{color:var(--mut);font-size:13px;padding:3px 0}
 #jump{display:none;margin:0 auto;position:sticky;bottom:4px}
-footer{border-top:1px solid var(--line);padding:8px;display:grid;gap:6px;background:var(--bg)}
+footer{border-top:1px solid var(--line);padding:8px;display:grid;grid-template-columns:minmax(0,1fr);gap:6px;background:var(--bg)}
 #macros{display:flex;gap:6px;overflow-x:auto}
 #macros button{white-space:nowrap;padding:5px 10px;font-size:13px}
 .row{display:flex;gap:6px}
@@ -38,6 +38,14 @@ dialog::backdrop{background:#000a}
 dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}
 dialog input,dialog select{color:var(--tx)}
 dialog p{color:var(--mut);font-size:13px;margin:6px 0}
+header{gap:4px}
+header button{padding:9px 10px}
+#login{max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#msg{width:0}
+#emo{display:none;gap:6px;overflow-x:auto}
+#emo.open{display:flex}
+.ib{padding:9px 11px}
+@media(max-width:520px){header b{display:none}}
 @media(min-width:860px){
  body{grid-template-columns:1fr 380px;grid-template-rows:auto 1fr auto}
  header{grid-column:1/3}
@@ -59,9 +67,12 @@ dialog p{color:var(--mut);font-size:13px;margin:6px 0}
 <div id="chat" aria-live="polite"></div>
 <footer>
  <div id="st" class="sys">Chat above is Kick's own chat. Messages you send here appear in it.</div>
+ <div id="emo"></div>
  <div id="macros"></div>
  <div class="row">
-  <input id="msg" placeholder="Send a message" maxlength="500" autocomplete="off">
+  <button id="idbtn" class="ib" aria-label="Chat identity">🛡</button>
+  <input id="msg" placeholder="Send a message" maxlength="500" autocomplete="off" enterkeyhint="send">
+  <button id="emobtn" class="ib" aria-label="Emoji">😀</button>
   <button id="send" class="pri">Send</button>
  </div>
 </footer>
@@ -88,6 +99,9 @@ dialog p{color:var(--mut);font-size:13px;margin:6px 0}
  <label>Hide messages containing (comma separated)
   <input id="mute" placeholder="word1, word2">
  </label>
+ <label>Hide Kick's own message box (px, 0 = show it)
+  <input id="clip" type="range" min="0" max="220" value="120">
+ </label>
  <label>Chat text size
   <input id="fs" type="range" min="12" max="22" value="15">
  </label>
@@ -97,6 +111,15 @@ dialog p{color:var(--mut);font-size:13px;margin:6px 0}
  <div class="row" style="justify-content:flex-end">
   <button id="close" class="pri">Save</button>
  </div>
+</dialog>
+
+<dialog id="idlg">
+ <h3 style="margin:0">Chat identity</h3>
+ <p id="iname"></p>
+ <div id="sw" style="display:flex;flex-wrap:wrap;gap:10px;margin:10px 0"></div>
+ <div class="row"><button id="rnd">New random color every message</button></div>
+ <p>These colors show on your own composer line. Kick decides the color everyone sees in chat and only lets you change it on kick.com.</p>
+ <div class="row" style="justify-content:space-between;align-items:center"><a id="kk" target="_blank" rel="noopener" style="color:var(--g)">Open Kick identity</a><button id="iclose" class="pri">Done</button></div>
 </dialog>
 
 <script>
@@ -152,7 +175,7 @@ async function send(text){
   if(S.colmode==='fixed'){S.col=S.col||randColor();save()}
   const col=S.colmode==='fixed'?S.col:randColor();
   line(user.name,col,text);
-  $('#msg').value='';
+  $('#msg').value='';$('#msg').focus();
  }catch(e){sys('Send blocked by the browser or network. Try again or check your token.')}
 }
 
@@ -164,19 +187,19 @@ $('#msg').onkeydown=e=>{if(e.key==='Enter')send($('#msg').value)};
 $('#cfg').onclick=()=>{
  $('#bid').value=S.bid||'';$('#rid').value=S.rid||'';
  $('#colmode').value=S.colmode||'rand';$('#hl').value=S.hl||'';$('#mute').value=S.mute||'';
- $('#fs').value=S.fs||15;$('#mac').value=(S.mac||['gg','LUL','W stream']).join('\n');
+ $('#fs').value=S.fs||15;$('#clip').value=S.clip??120;$('#mac').value=(S.mac||['gg','LUL','W stream']).join('\n');
  $('#dlg').showModal();
 };
 $('#close').onclick=()=>{
  S.bid=$('#bid').value.trim();
  const nr=$('#rid').value.trim();const ridChanged=nr&&nr!==S.rid;S.rid=nr;
  S.colmode=$('#colmode').value;S.hl=$('#hl').value;S.mute=$('#mute').value;
- S.fs=$('#fs').value;S.mac=$('#mac').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12);
+ S.fs=$('#fs').value;S.clip=$('#clip').value;S.mac=$('#mac').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12);
  save();applyPrefs();$('#dlg').close();
  
 };
 function applyPrefs(){
- chat.style.fontSize=(S.fs||15)+'px';
+ chat.style.fontSize=(S.fs||15)+'px';document.documentElement.style.setProperty('--clip',(S.clip??120)+'px');
  const box=$('#macros');box.innerHTML='';
  (S.mac||['gg','LUL','W stream']).forEach(t=>{
   const b=document.createElement('button');b.textContent=t;b.onclick=()=>send(t);box.append(b);
@@ -187,6 +210,19 @@ function showUser(){$('#login').textContent=user?user.name:'Log in';$('#login').
 $('#login').onclick=()=>{if(!user)location.href='/auth/login'};
 $('#logout').onclick=()=>{location.href='/auth/logout'};
 fetch('/api/me').then(r=>r.ok?r.json():null).then(j=>{user=j;showUser()}).catch(()=>{});
+const COLS=['#ff6b6b','#ffa94d','#ffe066','#69db7c','#38d9a9','#4dabf7','#9775fa','#f783ac','#e8eeee'];
+$('#idbtn').onclick=()=>{
+ $('#iname').textContent=user?'Logged in as '+user.name:'Not logged in';
+ $('#kk').href='https://kick.com/'+(channel||'');
+ const sw=$('#sw');sw.innerHTML='';
+ COLS.forEach(c=>{const b=document.createElement('button');b.style.cssText='width:38px;height:38px;padding:0;border-radius:50%;background:'+c;b.setAttribute('aria-label','Color '+c);b.onclick=()=>{S.colmode='fixed';S.col=c;save();line(user?user.name:'you',c,'color set')};sw.append(b)});
+ $('#idlg').showModal();
+};
+$('#rnd').onclick=()=>{S.colmode='rand';save();sys('Random color every message')};
+$('#iclose').onclick=()=>$('#idlg').close();
+['😂','🔥','💀','❤️','👏','😭','🙏','👀','🫡','💯'].forEach(e=>{const b=document.createElement('button');b.textContent=e;b.style.padding='4px 9px';b.onclick=()=>{$('#msg').value+=e;$('#msg').focus()};$('#emo').append(b)});
+$('#emobtn').onclick=()=>$('#emo').classList.toggle('open');
+['#send','#emobtn','#idbtn'].forEach(q=>$(q).addEventListener('mousedown',e=>e.preventDefault()));
 applyPrefs();
 if(S.channel){$('#ch').value=S.channel;watch(S.channel)}
 </script>
