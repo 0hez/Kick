@@ -72,6 +72,20 @@ header button{padding:9px 10px}
  <div id="st" class="sys">Chat above is Kick's own chat. Messages you send here appear in it.</div>
  <div id="emo"></div>
  <div id="macros"></div>
+ <div id="repeatPanel" class="row">
+  <select id="repeatDuration" aria-label="Repeat duration">
+   <option value="60000">1 minute</option>
+   <option value="300000">5 minutes</option>
+  </select>
+  <select id="repeatInterval" aria-label="Repeat interval">
+   <option value="30000">Every 30 seconds</option>
+   <option value="60000">Every 1 minute</option>
+   <option value="120000">Every 2 minutes</option>
+  </select>
+  <button id="repeatToggle" type="button">Start repeat</button>
+  <button id="repeatStop" type="button" disabled>Stop</button>
+  <span id="repeatState" aria-live="off"></span>
+ </div>
  <div class="row">
   <button id="idbtn" class="ib" aria-label="Chat identity">🛡</button>
   <input id="msg" placeholder="Send a message" maxlength="500" autocomplete="off" enterkeyhint="send">
@@ -173,16 +187,18 @@ async function send(text){
  lastSend=Date.now();
  try{
   const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({broadcaster_user_id:Number(S.bid),content:text})});
-  if(r.status===401){user=null;showUser();sys('Session expired. Log in again.');return}
-  if(!r.ok){sys('Send failed ('+r.status+').');return}
+  if(r.status===401){user=null;showUser();sys('Session expired. Log in again.');return false}
+  if(!r.ok){sys('Send failed ('+r.status+').');return false}
   if(S.colmode==='fixed'){S.col=S.col||randColor();save()}
   const col=S.colmode==='fixed'?S.col:randColor();
   line(user.name,col,text);
   $('#msg').value='';$('#msg').focus();
- }catch(e){sys('Send blocked by the browser or network. Try again or check your token.')}
+  return true;
+ }catch(e){sys('Send blocked by the browser or network. Try again or check your token.');return false}
 }
 
-// Bounded repeat sender. Uses a fixed, conservative interval and stops on errors.
+
+// Repeat sender: sends only at the selected interval and can be stopped at any time.
 let repeatTimer=null, repeatEnd=0, repeatBusy=false;
 function stopRepeat(){
  if(repeatTimer!==null)clearTimeout(repeatTimer);
@@ -206,7 +222,7 @@ $('#repeatToggle').onclick=()=>{
  if(!message||!user||!S.bid){sys('Enter a message, log in, and load a channel first.');return}
  if(repeatTimer!==null||repeatBusy)return;
  const duration=Number($('#repeatDuration').value);
- const interval=Math.max(30000,Number($('#repeatInterval').value));
+ const interval=Number($('#repeatInterval').value);
  repeatEnd=Date.now()+duration;
  $('#repeatToggle').disabled=true;$('#repeatStop').disabled=false;
  $('#repeatState').textContent='Repeating…';
