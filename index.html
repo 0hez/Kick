@@ -219,6 +219,7 @@ dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}
  <label>Followage bot (only active when logged in as kervvo)
   <select id="botmode"><option value="1">On</option><option value="0">Off</option></select>
  </label>
+ <p id="botst"></p>
  <label>Highlight words (comma separated)
   <input id="hl" placeholder="your name, giveaway">
  </label>
@@ -282,6 +283,10 @@ const csv=v=>(v||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
 S.rids=S.rids||{};S.bids=S.bids||{};S.pfps=S.pfps||{};S.favs=S.favs||[];
 if(S.bid&&S.channel&&!S.bids[S.channel])S.bids[S.channel]=S.bid;
 if(S.rid&&S.channel&&!S.rids[S.channel])S.rids[S.channel]=S.rid;
+const PHOSTS=['us2','us3','mt1','eu','ap1','ap2','ap3','ap4','sa1'];
+let pHost=Math.max(0,PHOSTS.indexOf(S.ph||'us2')),rot=0,brot=0;
+const pusherUrl=()=>'wss://ws-'+PHOSTS[pHost]+'.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false';
+const rememberHost=()=>{if(S.ph!==PHOSTS[pHost]){S.ph=PHOSTS[pHost];save()}};
 let channel,lastSend=0,user=null,popped=false;const LIVE={};
 const chat=$('#chat');
 function sys(t){const e=$('#st');e.style.color='';e.textContent=t}
@@ -347,7 +352,7 @@ function chatFallback(name,why){
 function openSock(rid,my){
  closeSock();setConn('connecting');
  let opened=false,got=false;
- const w=new WebSocket('wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false');
+ const w=new WebSocket(pusherUrl());
  sock=w;
  w.onopen=()=>{opened=true};
  w.onmessage=ev=>{
@@ -355,13 +360,14 @@ function openSock(rid,my){
   if(d.event==='pusher:connection_established'){
    ['chatrooms.'+rid+'.v2','chatrooms.'+rid,'chatroom_'+rid].forEach(c=>w.send(JSON.stringify({event:'pusher:subscribe',data:{auth:'',channel:c}})));
   }
-  else if(d.event==='pusher_internal:subscription_succeeded'){retry=0;got=true;setConn('live');clearSt()}
+  else if(d.event==='pusher_internal:subscription_succeeded'){retry=0;rot=0;rememberHost();got=true;setConn('live');clearSt()}
   else if(d.event==='pusher:error'){let e=d.data;try{e=typeof e==='string'?JSON.parse(e):e}catch(x){}sys('Chat error: '+((e&&e.message)||'unknown'))}
   else if(d.event==='pusher:ping')w.send('{"event":"pusher:pong","data":{}}');
   else if(/ChatMessage/.test(d.event||'')){let p;try{p=typeof d.data==='string'?JSON.parse(d.data):d.data}catch(e){return}fromKick(p)}
  };
  w.onclose=ev=>{
   if(my!==gen)return;
+  if(!got&&ev.code>=4000&&ev.code<4100&&rot<PHOSTS.length){rot++;pHost=(pHost+1)%PHOSTS.length;setTimeout(()=>{if(my===gen)openSock(rid,my)},150);return}
   retry++;
   if(retry>=3&&!got){chatFallback(channel,'Live connection blocked ('+(opened?'closed '+ev.code:'could not connect')+'). Showing Kick chat instead.');return}
   setConn('retry');
@@ -526,6 +532,8 @@ async function sendWhenReady(text){
 // Bot: only runs when you're logged in as kervvo. Anyone's "$followage" (typed here or in the regular Kick app)
 // is answered in chat by your account, in every sidebar streamer's chat while this page is open.
 const BOT_USER='kervvo';
+let botStatus='starting';
+function setBot(t){botStatus=t;const e=$('#botst');if(e)e.textContent='Followage bot: '+t}
 const isBot=()=>!!user&&String(user.name||'').toLowerCase()===BOT_USER&&S.bot!==0;
 const botSeen={},botIds=new Set();let botQ=Promise.resolve(),botQn=0;
 function botCheck(p,ts,ch){
@@ -538,10 +546,11 @@ function botCheck(p,ts,ch){
  if(now-(botSeen[key]||0)<30000||botQn>=5)return;
  botSeen[key]=now;botQn++;
  botQ=botQ.then(async()=>{
+  const bid=S.bids[ch];if(!bid){setBot('no broadcaster id for '+ch);return}
+  if(who.toLowerCase()===ch){await sendTo(bid,'@'+who+' you are the streamer of this channel.');setBot('replied to '+who+' in '+ch);return}
   const info=await lookupFollow(ch,who);
-  if(!info)return;
-  const bid=S.bids[ch];if(!bid)return;
-  await sendTo(bid,followText(who,ch,info));
+  if(!info){setBot('could not look up '+who+' (Kick blocked it; server needs /api/followage)');return}
+  await sendTo(bid,followText(who,ch,info));setBot('replied to '+who+' in '+ch);
  }).catch(()=>{}).then(()=>{botQn--});
 }
 // send as your account to a specific channel, respecting the cooldown and Retry-After
@@ -564,14 +573,17 @@ function botSockSync(force){
    S.favs.forEach(f=>{const r=S.rids[f.n];if(r)map[r]=f.n});
    if(channel&&S.rids[channel])map[S.rids[channel]]=channel;
   }
+  if(!isBot())setBot(user?'off (logged in as '+user.name+', needs '+BOT_USER+')':'off (not logged in)');
   const ids=Object.keys(map).slice(0,25),sig=ids.map(i=>i+map[i]).join(',');
   if(!force&&sig===bsig&&(bsock||!ids.length))return;
-  bsig=sig;closeBot();if(!ids.length)return;
-  const w=new WebSocket('wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false');
-  bsock=w;
+  bsig=sig;closeBot();if(!ids.length){if(isBot())setBot('waiting for chat IDs');return}
+  setBot('connecting…');
+  const w=new WebSocket(pusherUrl());
+  bsock=w;let bgot=false;
   w.onmessage=ev=>{
    let d;try{d=JSON.parse(ev.data)}catch(e){return}
    if(d.event==='pusher:connection_established'){bretry=0;ids.forEach(id=>w.send(JSON.stringify({event:'pusher:subscribe',data:{auth:'',channel:'chatrooms.'+id+'.v2'}})))}
+   else if(d.event==='pusher_internal:subscription_succeeded'){bgot=true;brot=0;rememberHost();setBot('listening in '+ids.length+' chat'+(ids.length===1?'':'s'))}
    else if(d.event==='pusher:ping')w.send('{"event":"pusher:pong","data":{}}');
    else if(/ChatMessage/.test(d.event||'')){
     let p;try{p=typeof d.data==='string'?JSON.parse(d.data):d.data}catch(e){return}
@@ -579,7 +591,9 @@ function botSockSync(force){
     botCheck(p,Date.parse(p&&p.created_at)||Date.now(),ch);
    }
   };
-  w.onclose=()=>{if(bsock!==w)return;bsock=null;bretry++;setTimeout(()=>botSockSync(true),Math.min(30000,1000*2**Math.min(bretry,5)))};
+  w.onclose=ev=>{if(bsock!==w)return;bsock=null;
+   if(!bgot&&ev.code>=4000&&ev.code<4100&&brot<PHOSTS.length){brot++;pHost=(pHost+1)%PHOSTS.length;setBot('trying another server…');setTimeout(()=>botSockSync(true),150);return}
+   setBot('connection closed ('+ev.code+'), retrying');bretry++;setTimeout(()=>botSockSync(true),Math.min(30000,1000*2**Math.min(bretry,5)))};
   w.onerror=()=>{try{w.close()}catch(e){}};
  },700);
 }
@@ -764,7 +778,7 @@ $('#cfg').onclick=()=>{
  $('#bid').value=S.bids[channel]||S.bid||'';$('#rid').value=S.rids[channel]||'';
  $('#colmode').value=S.colmode||'rand';$('#botmode').value=S.bot===0?'0':'1';$('#hl').value=S.hl||'';$('#mute').value=S.mute||'';
  $('#qe').value=(S.qe&&S.qe.length?S.qe:DEFAULT_EMOTES).join('\n');$('#fs').value=S.fs||15;$('#mac').value=(S.mac||['gg','LUL','W stream']).join('\n');
- $('#dlg').showModal();
+ setBot(botStatus);$('#dlg').showModal();
 };
 $('#close').onclick=()=>{
  S.bid=$('#bid').value.trim();if(channel)S.bids[channel]=S.bid;
