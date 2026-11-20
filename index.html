@@ -9,7 +9,7 @@
 :root{
  --bg:#07060e;--bg2:#0d0b18;--panel:#141126;--panel2:#1b1733;--line:#2a2447;--tx:#f3f1ff;--mut:#9a95c0;
  --g:#53fc18;--v:#8b5cf6;--c:#22d3ee;--grad:linear-gradient(120deg,var(--g),var(--c) 55%,var(--v));
- --r:12px;--pad:8px;--h:38px;--side:76px;color-scheme:dark
+ --r:12px;--pad:10px;--h:38px;--side:76px;color-scheme:dark
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overscroll-behavior:none;margin:0;background:var(--bg);color:var(--tx);font:14px/1.35 ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden}
@@ -52,28 +52,30 @@ body.sideoff #side{width:0;opacity:0;padding:0;border-right-color:transparent;po
 #main{flex:1 1 auto;min-width:0;min-height:0;display:flex;flex-direction:column}
 
 /* header */
-header{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:8px var(--pad);border-bottom:1px solid var(--line);background:#0a0816cc;backdrop-filter:blur(12px);z-index:2}
+header{display:grid;grid-template-columns:auto auto minmax(max-content,1fr) minmax(0,auto) auto;align-items:center;gap:8px;padding:8px var(--pad);border-bottom:1px solid var(--line);background:#0a0816cc;backdrop-filter:blur(12px);z-index:2}
 #tog{width:var(--h);padding:0;font-size:17px}
 header b{font-size:17px;font-weight:900;letter-spacing:.2px;white-space:nowrap;background:var(--grad);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 6s linear infinite}
 @keyframes flow{to{background-position:250% 0}}
-#now{min-width:0;height:var(--h);display:flex;align-items:center;gap:8px;padding:0 12px 0 6px;border-radius:99px;background:linear-gradient(135deg,#1a1536,#0e0b20);border:1px solid #3a3170;overflow:hidden;position:relative}
+#now{min-width:0;height:var(--h);display:flex;align-items:center;gap:8px;padding:0 10px 0 6px;border-radius:99px;background:linear-gradient(135deg,#1a1536,#0e0b20);border:1px solid #3a3170;overflow:hidden;position:relative}
 #now::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,#ffffff12 50%,transparent 70%);transform:translateX(-120%);animation:sheen 5s ease-in-out infinite;pointer-events:none}
 @keyframes sheen{60%,100%{transform:translateX(120%)}}
 #now .ph{color:var(--mut);font-size:13px;padding-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #now .p{flex:0 0 auto;width:26px;height:26px;border-radius:50%;object-fit:cover;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;border:1.5px solid #5a4cc0}
 #now .p.live{border-color:var(--g);box-shadow:0 0 8px #53fc18aa}
-#now .nm{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#now .tag{flex:0 0 auto;font-size:9px;font-weight:900;letter-spacing:.4px;color:#06130a;background:var(--g);padding:1px 5px;border-radius:5px;animation:pulse 1.6s infinite}
-#login{max-width:120px;overflow:hidden;text-overflow:ellipsis}
-#login.me{display:flex;align-items:center;gap:7px;padding:0 12px 0 5px;border-radius:99px;font-weight:800;background:linear-gradient(#120f26,#120f26) padding-box,var(--grad) border-box;border:1.5px solid transparent;box-shadow:0 0 14px #8b5cf633}
-#login.me .dot{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:#06130a;background:var(--grad)}
-#login.me .un{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:76px}
+#now .nm{font-weight:800;font-size:14px;white-space:nowrap;flex:0 0 auto}
+#now .tag{flex:0 0 auto;font-size:8.5px;font-weight:900;letter-spacing:.4px;color:#06130a;background:var(--g);padding:1px 5px;border-radius:5px;animation:pulse 1.6s infinite}
+#login{max-width:110px;overflow:hidden;text-overflow:ellipsis}
+#login.me{display:flex;align-items:center;gap:6px;padding:0 9px 0 5px;border-radius:10px;font-weight:600;font-size:13px;background:var(--panel);border:1px solid var(--line);color:var(--tx)}
+#login.me .av2{flex:0 0 auto;width:24px;height:24px;border-radius:50%;object-fit:cover;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+#login.me .un{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:64px}
 #cfg{width:var(--h);padding:0}
 
 /* player */
-#stage{width:100%;aspect-ratio:16/9;max-height:calc(var(--app-vh,100dvh)*.3);flex:0 0 auto;background:#000;display:grid;place-items:center;color:var(--mut);overflow:hidden;text-align:center;padding:0 12px}
+#stage{position:relative;width:100%;aspect-ratio:16/9;max-height:calc(var(--app-vh,100dvh)*.3);flex:0 0 auto;background:#000;display:grid;place-items:center;color:var(--mut);overflow:hidden;text-align:center;padding:0 12px}
 #stage iframe{width:100%;height:100%;border:0;display:block;animation:fade .5s}
 @keyframes fade{from{opacity:0}}
+#tap{position:absolute;inset:0;display:grid;place-items:center;background:#000a;border:0;border-radius:0;height:auto;color:#fff;font-weight:800;font-size:15px;z-index:3;backdrop-filter:blur(3px)}
+#tap span{background:var(--grad);color:#06130a;padding:10px 18px;border-radius:99px;box-shadow:0 8px 24px #0009}
 
 /* chat */
 #chat{position:relative;flex:1 1 0;min-height:0;min-width:0;background:linear-gradient(180deg,#0a0816,#07060e);overflow:hidden;border-top:1px solid var(--line);display:flex;flex-direction:column}
@@ -97,10 +99,20 @@ header b{font-size:17px;font-weight:900;letter-spacing:.2px;white-space:nowrap;b
 @keyframes pulse{0%{box-shadow:0 0 0 0 #53fc1888}100%{box-shadow:0 0 0 8px #53fc1800}}
 
 /* footer */
-footer{position:relative;flex:0 0 auto;width:100%;min-width:0;border-top:1px solid var(--line);padding:6px var(--pad) calc(6px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;background:#0a0816;z-index:20}
+footer{position:relative;flex:0 0 auto;width:100%;min-width:0;border-top:1px solid var(--line);padding:8px var(--pad) calc(8px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;background:#0a0816;z-index:20}
 #st{color:var(--mut);font-size:12px;line-height:1.2;max-height:16px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 #st:empty{display:none}
-#emo{display:none;gap:6px;overflow-x:auto;scrollbar-width:none}#emo.open{display:flex}#emo button{height:38px;padding:0 10px}
+#emo{display:none;max-height:34vh;overflow-y:auto;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:8px;animation:in .2s ease-out}#emo.open{display:block}
+#emo .eh{color:var(--mut);font-size:12px;margin:4px 2px 6px}
+#emo .eg{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px}
+#emo button{height:40px;padding:0;display:grid;place-items:center;border-radius:10px;font-size:20px;background:var(--panel)}
+#emo button img{max-height:28px;max-width:34px;object-fit:contain;pointer-events:none}
+#cmdtog{height:26px;padding:0 10px;align-self:flex-end;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);border-radius:99px;background:var(--panel)}
+#cmdtog i{font-style:normal;font-size:16px;line-height:1;transition:transform .3s}
+#cmdtog.open i{transform:rotate(180deg)}
+#cmds{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+#cmds.open{grid-template-rows:1fr}
+#cmds>div{overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:8px}
 #macros,#emoteQuick{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 calc(var(--pad)*-1);padding:0 var(--pad);scroll-padding:0 var(--pad);-webkit-overflow-scrolling:touch}
 #macros::-webkit-scrollbar,#emoteQuick::-webkit-scrollbar{display:none}
 #macros:empty{display:none}
@@ -126,10 +138,10 @@ dialog::backdrop{background:#000b;backdrop-filter:blur(4px)}
 dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}dialog input,dialog select{color:var(--tx)}dialog p{color:var(--mut);font-size:13px;margin:6px 0}
 
 @media(max-width:859px){
- html.kb #stage,html.kb #emoteQuick,html.kb #macros,html.kb #repeatbar,html.kb #st,html.kb #side{display:none}
+ html.kb #stage,html.kb #emoteQuick,html.kb #cmdtog,html.kb #cmds,html.kb #st,html.kb #side{display:none}
  html.kb footer{padding-bottom:6px}
 }
-@media(max-width:520px){header b{display:none}header{grid-template-columns:auto minmax(0,1fr) auto auto}:root{--side:68px}}
+@media(max-width:520px){header b{display:none}header{grid-template-columns:auto minmax(max-content,1fr) minmax(0,auto) auto}:root{--side:68px}}
 @media(min-width:860px){
  #main{display:grid;grid-template-columns:minmax(0,1fr) 390px;grid-template-rows:auto minmax(0,1fr) auto}
  header{grid-column:1/3}
@@ -161,19 +173,22 @@ dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}
 </div>
 <footer>
  <div id="st" class="sys" aria-live="polite"></div>
- <div id="emo"></div>
- <div id="macros"></div>
  <div id="emoteQuick" aria-label="Quick-send Kick emotes"></div>
- <div id="repeatbar" aria-label="Repeat message controls">
+ <button id="cmdtog" type="button" aria-expanded="false" aria-controls="cmds"><span>Commands</span><i>⌄</i></button>
+ <div id="cmds"><div>
+  <div id="macros"></div>
+  <div id="repeatbar" aria-label="Repeat message controls">
   <select id="repeatDuration" aria-label="Repeat duration"><option value="60">1 min</option><option value="300">5 min</option><option value="600">10 min</option></select>
   <select id="repeatInterval" aria-label="Repeat interval"><option value="1">Every 1s</option><option value="2">Every 2s</option><option value="3">Every 3s</option><option value="5" selected>Every 5s</option><option value="10">Every 10s</option><option value="15">Every 15s</option><option value="30">Every 30s</option><option value="60">Every 1m</option></select>
   <button id="repeatStart" type="button">Start repeat</button>
   <button id="repeatStop" type="button" disabled>Stop</button>
  </div>
+ </div></div>
+ <div id="emo"></div>
  <div id="composer">
   <button id="idbtn" class="ib" aria-label="Chat identity">🛡</button>
   <input id="msg" placeholder="Send a message" maxlength="500" autocomplete="off" enterkeyhint="send">
-  <button id="emobtn" class="ib" aria-label="Emoji">😀</button>
+  <button id="emobtn" class="ib" aria-label="Emotes">😀</button>
   <button id="send" class="pri">Send</button>
  </div>
 </footer>
@@ -200,6 +215,9 @@ dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}
    <option value="rand">New random color every message</option>
    <option value="fixed">One fixed color</option>
   </select>
+ </label>
+ <label>Followage bot (your account answers $followage typed by anyone)
+  <select id="botmode"><option value="1">On</option><option value="0">Off</option></select>
  </label>
  <label>Highlight words (comma separated)
   <input id="hl" placeholder="your name, giveaway">
@@ -314,6 +332,7 @@ function divider(t){const d=document.createElement('div');d.className='div';d.te
 function setConn(s){cst.className=s==='live'?'live':'';cst.lastElementChild.textContent=s==='live'?'live chat':s==='connecting'?'connecting…':'reconnecting…'}
 function fromKick(p){
  if(!p||!p.content)return;
+ botCheck(p,Date.parse(p.created_at)||Date.now());
  const id=p.sender&&p.sender.identity||{};
  addMsg({id:p.id,u:p.sender&&p.sender.username,col:id.color,c:p.content,ts:Date.parse(p.created_at)||Date.now(),b:(id.badges||[]).map(b=>b.type)});
 }
@@ -328,7 +347,7 @@ function chatFallback(name,why){
 function openSock(rid,my){
  closeSock();setConn('connecting');
  let opened=false,got=false;
- const w=new WebSocket('wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0-rc2&flash=false');
+ const w=new WebSocket('wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false');
  sock=w;
  w.onopen=()=>{opened=true};
  w.onmessage=ev=>{
@@ -458,24 +477,85 @@ $('#tog').onclick=()=>setSide(document.body.classList.contains('sideoff'));
 if(S.side===0)document.body.classList.add('sideoff');
 
 // Player
-function watch(name){
+function watch(name,restore){
  channel=name.trim().toLowerCase();if(!channel)return;
  if(typeof stopRepeat==='function')stopRepeat();
  $('#stage').innerHTML='';
  const f=document.createElement('iframe');
  f.src='https://player.kick.com/'+encodeURIComponent(channel)+'?autoplay=true&muted=false';
- f.allow='autoplay; fullscreen; picture-in-picture';f.allowFullscreen=true;
+ f.allow='autoplay; fullscreen; picture-in-picture; encrypted-media';f.allowFullscreen=true;
  $('#stage').append(f);
+ if(restore){const t=document.createElement('button');t.id='tap';t.type='button';t.innerHTML='<span>▶ Tap to play with sound</span>';t.onclick=()=>watch(channel);$('#stage').append(t)}
  S.channel=channel;S.bid=S.bids[channel]||'';save();
  renderQuickEmotes();renderBubbles();updateNow();clearSt();
  connect().then(loadEmoteImages);
 }
 
 
+// $followage: your logged-in account replies in chat as a bot, for you and for anyone who types it.
+const plural=(n,w)=>n+' '+w+(n===1?'':'s');
+function fmtAge(since){
+ const a=new Date(since),b=new Date();
+ let y=b.getFullYear()-a.getFullYear(),m=b.getMonth()-a.getMonth(),d=b.getDate()-a.getDate();
+ if(d<0){m--;d+=new Date(b.getFullYear(),b.getMonth(),0).getDate()}
+ if(m<0){y--;m+=12}
+ const parts=[];if(y)parts.push(plural(y,'year'));if(m)parts.push(plural(m,'month'));if(d||!parts.length)parts.push(plural(d,'day'));
+ return parts.join(', ');
+}
+async function lookupFollow(ch,uname){
+ const names=[...new Set([uname,String(uname).replace(/_/g,'-'),String(uname).toLowerCase()])];
+ for(const n of names){
+  const urls=['/api/followage?channel='+encodeURIComponent(ch)+'&user='+encodeURIComponent(n),'https://kick.com/api/v2/channels/'+encodeURIComponent(ch)+'/users/'+encodeURIComponent(n)];
+  for(const u of urls){
+   const j=await getJSON2(u);const d=j&&(j.data||j);
+   if(d&&('following_since' in d||'is_following' in d))return d;
+  }
+ }
+ return null;
+}
+const followText=(who,ch,info)=>{
+ if(!info.following_since)return '@'+who+' you are not following '+ch+'.';
+ const when=new Date(info.following_since).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+ return '@'+who+' you have followed '+ch+' for '+fmtAge(info.following_since)+' (since '+when+').';
+};
+async function sendWhenReady(text){
+ const w=1600-(Date.now()-lastSend);if(w>0)await delay(w);
+ return send(text,{silent:true});
+}
+// your own $followage: the reply is posted to chat by your account
+async function followage(arg){
+ const ch=String(arg||channel||'').toLowerCase().replace(/[^a-z0-9_-]/g,'');
+ if(!user){sys('Log in first to use $followage.');return}
+ if(!ch){sys('Pick a streamer first.');return}
+ sys('Checking followage…');
+ const info=await lookupFollow(ch,user.name);
+ if(!info){sys('Could not check followage. Kick blocked the lookup, so your server needs a /api/followage route.');return}
+ const ok=await sendWhenReady(followText(user.name,ch,info));
+ sys(ok?'':'Could not post the followage reply.');
+}
+// bot: when anyone types $followage in the chat you're watching, your account answers them
+const botSeen={};let botQ=Promise.resolve(),botLast=0;
+function botCheck(p,ts){
+ if(S.bot===0||!user||!p||!p.sender||!channel)return;
+ if(!/^\$followage\s*$/i.test((p.content||'').trim()))return;
+ if(Date.now()-ts>20000)return;
+ const who=p.sender.username;if(!who)return;
+ const key=channel+':'+who.toLowerCase(),now=Date.now();
+ if(now-(botSeen[key]||0)<30000||now-botLast<2500)return;
+ botSeen[key]=now;botLast=now;
+ const ch=channel;
+ botQ=botQ.then(async()=>{
+  const info=await lookupFollow(ch,who);
+  if(!info||ch!==channel)return;
+  await sendWhenReady(followText(who,ch,info));
+ }).catch(()=>{});
+}
+
 // Send. Repeating sends wait for the local cooldown and respect server 429 Retry-After.
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function send(text, options={}){
  text=(text||'').trim();if(!text)return false;
+ if(!options.repeat&&/^\$followage(\s|$)/i.test(text)){$('#msg').value='';followage(text.split(/\s+/)[1]);return true}
  if(!user){if(!options.silent)sys('Log in to send messages.');return false}
  if(!S.bid){if(!options.silent)sys('Could not find this channel yet.');return false}
  while(true){
@@ -649,14 +729,14 @@ $('#send').onclick=()=>send($('#msg').value);
 $('#msg').onkeydown=e=>{if(e.key==='Enter')send($('#msg').value)};
 $('#cfg').onclick=()=>{
  $('#bid').value=S.bids[channel]||S.bid||'';$('#rid').value=S.rids[channel]||'';
- $('#colmode').value=S.colmode||'rand';$('#hl').value=S.hl||'';$('#mute').value=S.mute||'';
+ $('#colmode').value=S.colmode||'rand';$('#botmode').value=S.bot===0?'0':'1';$('#hl').value=S.hl||'';$('#mute').value=S.mute||'';
  $('#qe').value=(S.qe&&S.qe.length?S.qe:DEFAULT_EMOTES).join('\n');$('#fs').value=S.fs||15;$('#mac').value=(S.mac||['gg','LUL','W stream']).join('\n');
  $('#dlg').showModal();
 };
 $('#close').onclick=()=>{
  S.bid=$('#bid').value.trim();if(channel)S.bids[channel]=S.bid;
  const nr=$('#rid').value.trim();const changed=channel&&nr&&nr!==S.rids[channel];if(channel&&nr)S.rids[channel]=nr;
- S.colmode=$('#colmode').value;S.hl=$('#hl').value;S.mute=$('#mute').value;
+ S.colmode=$('#colmode').value;S.bot=Number($('#botmode').value);S.hl=$('#hl').value;S.mute=$('#mute').value;
  S.fs=$('#fs').value;S.qe=$('#qe').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,24);S.mac=$('#mac').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,12);
  save();applyPrefs();$('#dlg').close();loadEmoteImages();
  if(changed)connect();
@@ -669,7 +749,25 @@ function applyPrefs(){
  });
 }
 
-function showUser(){const lg=$('#login');lg.textContent='';if(user){lg.className='me';const d=document.createElement('span');d.className='dot';d.textContent=(user.name||'?')[0].toUpperCase();const u=document.createElement('span');u.className='un';u.textContent=user.name;lg.title='Logged in as '+user.name;lg.append(d,u)}else{lg.className='pri';lg.textContent='Log in'}$('#acct').textContent=user?'Logged in as '+user.name:'Not logged in.'}
+let userPfp='';
+function showUser(){
+ const lg=$('#login');lg.textContent='';
+ if(user){
+  lg.className='me';lg.title='Logged in as '+user.name;
+  let av;
+  if(userPfp){av=document.createElement('img');av.src=userPfp;av.alt='';av.referrerPolicy='no-referrer';av.onerror=()=>{userPfp='';showUser()}}
+  else{av=initial(user.name||'?')}
+  av.classList.add('av2');
+  const u=document.createElement('span');u.className='un';u.textContent=user.name;
+  lg.append(av,u);
+  if(!userPfp&&!showUser.tried){showUser.tried=true;
+   const direct=user.pfp||user.profile_pic||user.avatar;
+   if(direct){userPfp=direct;showUser()}
+   else getMeta(String(user.name).toLowerCase()).then(m=>{if(m.pfp){userPfp=m.pfp;showUser()}});
+  }
+ }else{lg.className='pri';lg.textContent='Log in'}
+ $('#acct').textContent=user?'Logged in as '+user.name:'Not logged in.';
+}
 $('#login').onclick=()=>{if(!user)location.href='/auth/login'};
 $('#logout').onclick=()=>{stopRepeat();location.href='/auth/logout'};
 fetch('/api/me').then(r=>r.ok?r.json():null).then(j=>{user=j;showUser()}).catch(()=>{});
@@ -683,15 +781,38 @@ $('#idbtn').onclick=()=>{
 };
 $('#rnd').onclick=()=>{S.colmode='rand';save();sys('Random color every message')};
 $('#iclose').onclick=()=>$('#idlg').close();
-['😂','🔥','💀','❤️','👏','😭','🙏','👀','🫡','💯'].forEach(e=>{const b=document.createElement('button');b.textContent=e;b.style.padding='4px 9px';b.onclick=()=>{$('#msg').value+=e;$('#msg').focus({preventScroll:true})};$('#emo').append(b)});
-$('#emobtn').onclick=()=>$('#emo').classList.toggle('open');
+$('#emobtn').onclick=()=>{const o=$('#emo').classList.toggle('open');if(o)renderEmo()};
+function renderEmo(){
+ const box=$('#emo');box.innerHTML='';
+ const ins=t=>{const m=$('#msg');m.value+=(m.value&&!m.value.endsWith(' ')?' ':'')+t+' ';m.focus({preventScroll:true})};
+ const group=(title,items)=>{
+  if(!items.length)return;
+  const h=document.createElement('div');h.className='eh';h.textContent=title;
+  const g=document.createElement('div');g.className='eg';items.forEach(x=>g.append(x));box.append(h,g);
+ };
+ const emoteBtn=(name,em,real)=>{
+  const b=document.createElement('button');b.type='button';b.title=name;b.setAttribute('aria-label',name);
+  const i=document.createElement('img');i.alt=name;i.loading='lazy';i.src=em.url;i.onerror=()=>{i.remove();b.textContent=name.slice(0,3);b.style.fontSize='11px'};b.append(i);
+  b.onclick=()=>ins(real?'[emote:'+em.kick+':'+name+']':name);return b;
+ };
+ const kick=[],other=[];
+ emoteImages.forEach((em,name)=>{if(em.kick){if(kick.length<160)kick.push(emoteBtn(name,em,true))}else if(other.length<60)other.push(emoteBtn(name,em,false))});
+ group('Kick emotes',kick);
+ group('7TV and others (send as text)',other);
+ const emo=['😂','🔥','💀','❤️','👏','😭','🙏','👀','🫡','💯','😎','🤣','😍','🥶','🤝','🎉'].map(e=>{const b=document.createElement('button');b.type='button';b.textContent=e;b.onclick=()=>ins(e);return b});
+ group('Emoji',emo);
+}
+function setCmds(o,keep){$('#cmds').classList.toggle('open',o);$('#cmdtog').classList.toggle('open',o);$('#cmdtog').setAttribute('aria-expanded',o);if(!keep){S.cmds=o?1:0;save()}}
+$('#cmdtog').onclick=()=>setCmds(!$('#cmds').classList.contains('open'));
+
 
 
 applyPrefs();
+setCmds(!!S.cmds,true);
 renderQuickEmotes();
 renderBubbles();
 updateNow();
-if(S.channel)watch(S.channel);
+if(S.channel)watch(S.channel,true);
 refreshLive();
 
 </script>
