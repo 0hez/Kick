@@ -39,6 +39,11 @@ body.sideoff #side{width:0;opacity:0;padding:0;border-right-color:transparent;po
 .bub:hover .av{transform:scale(1.07)}
 .bub.on .av{background:var(--grad);box-shadow:0 0 16px #22d3ee66;animation:glow 2.6s ease-in-out infinite}
 .bub.on{color:var(--tx)}
+@property --a{syntax:"<angle>";initial-value:0deg;inherits:false}
+.bub.live .av{background:conic-gradient(from var(--a),#53fc18,#c8ffa8,#53fc18,#18a800,#53fc18);box-shadow:0 0 14px #53fc18cc,0 0 28px #53fc1866;animation:spin 2.2s linear infinite,gpulse 1.6s ease-in-out infinite}
+.bub.live{color:#c8ffa8}
+@keyframes spin{to{--a:360deg}}
+@keyframes gpulse{50%{box-shadow:0 0 22px #53fc18,0 0 40px #53fc1899}}
 .bub span.n{max-width:62px;font-size:10.5px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #addfav,#hide{width:42px;height:42px;padding:0;border-radius:50%;font-size:20px;flex:0 0 auto;background:var(--panel);color:var(--c)}
 @keyframes pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
@@ -47,12 +52,22 @@ body.sideoff #side{width:0;opacity:0;padding:0;border-right-color:transparent;po
 #main{flex:1 1 auto;min-width:0;min-height:0;display:flex;flex-direction:column}
 
 /* header */
-header{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto auto;align-items:center;gap:8px;padding:8px var(--pad);border-bottom:1px solid var(--line);background:#0a0816cc;backdrop-filter:blur(12px);z-index:2}
+header{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:8px var(--pad);border-bottom:1px solid var(--line);background:#0a0816cc;backdrop-filter:blur(12px);z-index:2}
 #tog{width:var(--h);padding:0;font-size:17px}
 header b{font-size:17px;font-weight:900;letter-spacing:.2px;white-space:nowrap;background:var(--grad);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 6s linear infinite}
 @keyframes flow{to{background-position:250% 0}}
-#ch{width:100%}
-#login{max-width:104px;overflow:hidden;text-overflow:ellipsis}
+#now{min-width:0;height:var(--h);display:flex;align-items:center;gap:8px;padding:0 12px 0 6px;border-radius:99px;background:linear-gradient(135deg,#1a1536,#0e0b20);border:1px solid #3a3170;overflow:hidden;position:relative}
+#now::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,#ffffff12 50%,transparent 70%);transform:translateX(-120%);animation:sheen 5s ease-in-out infinite;pointer-events:none}
+@keyframes sheen{60%,100%{transform:translateX(120%)}}
+#now .ph{color:var(--mut);font-size:13px;padding-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#now .p{flex:0 0 auto;width:26px;height:26px;border-radius:50%;object-fit:cover;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;border:1.5px solid #5a4cc0}
+#now .p.live{border-color:var(--g);box-shadow:0 0 8px #53fc18aa}
+#now .nm{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#now .tag{flex:0 0 auto;font-size:9px;font-weight:900;letter-spacing:.4px;color:#06130a;background:var(--g);padding:1px 5px;border-radius:5px;animation:pulse 1.6s infinite}
+#login{max-width:120px;overflow:hidden;text-overflow:ellipsis}
+#login.me{display:flex;align-items:center;gap:7px;padding:0 12px 0 5px;border-radius:99px;font-weight:800;background:linear-gradient(#120f26,#120f26) padding-box,var(--grad) border-box;border:1.5px solid transparent;box-shadow:0 0 14px #8b5cf633}
+#login.me .dot{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:#06130a;background:var(--grad)}
+#login.me .un{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:76px}
 #cfg{width:var(--h);padding:0}
 
 /* player */
@@ -62,7 +77,7 @@ header b{font-size:17px;font-weight:900;letter-spacing:.2px;white-space:nowrap;b
 
 /* chat */
 #chat{position:relative;flex:1 1 0;min-height:0;min-width:0;background:linear-gradient(180deg,#0a0816,#07060e);overflow:hidden;border-top:1px solid var(--line);display:flex;flex-direction:column}
-#chat iframe.fallback{position:absolute;left:0;bottom:-132px;width:100%;height:calc(100% + 132px);border:0}
+#chat iframe.fallback{position:absolute;inset:0;width:100%;height:100%;border:0}
 #msgs{flex:1 1 0;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:8px 10px 10px;display:flex;flex-direction:column;gap:1px;scrollbar-width:thin;scrollbar-color:#3a3170 transparent}
 #msgs::before{content:"";flex:1 1 auto}
 .m{padding:3px 6px;border-radius:8px;word-break:break-word;overflow-wrap:anywhere;line-height:1.45;animation:in .22s ease-out both}
@@ -114,7 +129,7 @@ dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}
  html.kb #stage,html.kb #emoteQuick,html.kb #macros,html.kb #repeatbar,html.kb #st,html.kb #side{display:none}
  html.kb footer{padding-bottom:6px}
 }
-@media(max-width:520px){header b{display:none}header{grid-template-columns:auto minmax(0,1fr) auto auto auto}:root{--side:68px}}
+@media(max-width:520px){header b{display:none}header{grid-template-columns:auto minmax(0,1fr) auto auto}:root{--side:68px}}
 @media(min-width:860px){
  #main{display:grid;grid-template-columns:minmax(0,1fr) 390px;grid-template-rows:auto minmax(0,1fr) auto}
  header{grid-column:1/3}
@@ -134,8 +149,7 @@ dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}
 <header>
  <button id="tog" aria-label="Toggle streamer sidebar" title="Streamers">☰</button>
  <b>KickDeck</b>
- <input id="ch" placeholder="channel name" autocapitalize="none" autocomplete="off">
- <button id="go" class="pri">Watch</button>
+ <div id="now" aria-live="polite"><span class="ph">Tap + to add a streamer</span></div>
  <button id="login" class="pri">Log in</button>
  <button id="cfg" aria-label="Settings">⚙</button>
 </header>
@@ -164,6 +178,13 @@ dialog label{display:grid;gap:4px;margin:10px 0;color:var(--mut);font-size:13px}
  </div>
 </footer>
 </div>
+<dialog id="adlg">
+ <h3 style="margin:0">Add a streamer</h3>
+ <p>Type a Kick channel name. It's saved to your sidebar and starts playing.</p>
+ <input id="addname" placeholder="channel name" autocapitalize="none" autocomplete="off" style="width:100%">
+ <div class="row" style="justify-content:flex-end;margin-top:12px"><button id="adcancel" type="button">Cancel</button><button id="adgo" class="pri" type="button">Add &amp; watch</button></div>
+</dialog>
+
 <dialog id="dlg">
  <h3 style="margin:0">Settings</h3>
  <p id="acct">Not logged in.</p>
@@ -243,7 +264,7 @@ const csv=v=>(v||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
 S.rids=S.rids||{};S.bids=S.bids||{};S.pfps=S.pfps||{};S.favs=S.favs||[];
 if(S.bid&&S.channel&&!S.bids[S.channel])S.bids[S.channel]=S.bid;
 if(S.rid&&S.channel&&!S.rids[S.channel])S.rids[S.channel]=S.rid;
-let channel,lastSend=0,user=null;
+let channel,lastSend=0,user=null,popped=false;const LIVE={};
 const chat=$('#chat');
 function sys(t){const e=$('#st');e.style.color='';e.textContent=t}
 function clearSt(){$('#st').textContent=''}
@@ -297,18 +318,36 @@ function fromKick(p){
  addMsg({id:p.id,u:p.sender&&p.sender.username,col:id.color,c:p.content,ts:Date.parse(p.created_at)||Date.now(),b:(id.badges||[]).map(b=>b.type)});
 }
 function closeSock(){if(sock){sock.onclose=null;sock.onmessage=null;try{sock.close()}catch(e){}sock=null}}
+function chatFallback(name,why){
+ closeSock();gen++;
+ msgsEl.style.display='none';
+ if(!$('.fallback')){const f=document.createElement('iframe');f.className='fallback';f.src='https://kick.com/popout/'+encodeURIComponent(name)+'/chat';chat.append(f)}
+ cst.className='';cst.lastElementChild.textContent='kick chat';
+ if(why)sys(why);
+}
 function openSock(rid,my){
  closeSock();setConn('connecting');
- const w=new WebSocket('wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false');
+ let opened=false,got=false;
+ const w=new WebSocket('wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0-rc2&flash=false');
  sock=w;
+ w.onopen=()=>{opened=true};
  w.onmessage=ev=>{
   let d;try{d=JSON.parse(ev.data)}catch(e){return}
-  if(d.event==='pusher:connection_established')w.send(JSON.stringify({event:'pusher:subscribe',data:{auth:'',channel:'chatrooms.'+rid+'.v2'}}));
-  else if(d.event==='pusher_internal:subscription_succeeded'){retry=0;setConn('live')}
+  if(d.event==='pusher:connection_established'){
+   ['chatrooms.'+rid+'.v2','chatrooms.'+rid,'chatroom_'+rid].forEach(c=>w.send(JSON.stringify({event:'pusher:subscribe',data:{auth:'',channel:c}})));
+  }
+  else if(d.event==='pusher_internal:subscription_succeeded'){retry=0;got=true;setConn('live');clearSt()}
+  else if(d.event==='pusher:error'){let e=d.data;try{e=typeof e==='string'?JSON.parse(e):e}catch(x){}sys('Chat error: '+((e&&e.message)||'unknown'))}
   else if(d.event==='pusher:ping')w.send('{"event":"pusher:pong","data":{}}');
-  else if(d.event==='App\\Events\\ChatMessageEvent'){let p;try{p=typeof d.data==='string'?JSON.parse(d.data):d.data}catch(e){return}fromKick(p)}
+  else if(/ChatMessage/.test(d.event||'')){let p;try{p=typeof d.data==='string'?JSON.parse(d.data):d.data}catch(e){return}fromKick(p)}
  };
- w.onclose=()=>{if(my!==gen)return;setConn('retry');retry++;setTimeout(()=>{if(my===gen)openSock(rid,my)},Math.min(15000,800*2**Math.min(retry,5)))};
+ w.onclose=ev=>{
+  if(my!==gen)return;
+  retry++;
+  if(retry>=3&&!got){chatFallback(channel,'Live connection blocked ('+(opened?'closed '+ev.code:'could not connect')+'). Showing Kick chat instead.');return}
+  setConn('retry');
+  setTimeout(()=>{if(my===gen)openSock(rid,my)},Math.min(15000,800*2**Math.min(retry,5)));
+ };
  w.onerror=()=>{try{w.close()}catch(e){}};
 }
 document.addEventListener('visibilitychange',()=>{
@@ -318,6 +357,7 @@ document.addEventListener('visibilitychange',()=>{
  if(stick)setTimeout(toBottom,50);
 });
 const getJSON2=async u=>{try{const r=await fetch(u,{credentials:'omit'});return r.ok?await r.json():null}catch(e){return null}};
+const lv=x=>!x?undefined:('livestream' in x?!!x.livestream:('is_live' in x?!!x.is_live:('live' in x?!!x.live:(('isLive' in x)?!!x.isLive:undefined))));
 async function getMeta(name){
  const o={};
  const a=await getJSON2('/api/channel?slug='+encodeURIComponent(name));
@@ -325,25 +365,29 @@ async function getMeta(name){
   o.bid=a.bid||a.user_id||(a.user&&a.user.id);
   o.rid=a.rid||a.chatroom_id||a.chatroomId||(a.chatroom&&a.chatroom.id);
   o.pfp=a.pfp||a.profile_pic||a.profilePic||a.avatar||(a.user&&(a.user.profile_pic||a.user.profilepic));
+  o.live=lv(a);
  }
- if(!o.rid||!o.pfp){
+ if(!o.rid||!o.pfp||o.live===undefined){
   const b=await getJSON2('https://kick.com/api/v2/channels/'+encodeURIComponent(name));
   if(b){
    o.bid=o.bid||b.user_id||(b.user&&b.user.id);
    o.rid=o.rid||(b.chatroom&&b.chatroom.id);
    o.pfp=o.pfp||(b.user&&(b.user.profile_pic||b.user.profilepic));
+   if(o.live===undefined)o.live=lv(b);
   }
  }
  return o;
 }
 function applyMeta(name,o){
+ if(o.live!==undefined)LIVE[name]=!!o.live;
+ if(o.live!==undefined&&!o.pfp)renderBubbles();
  if(o.bid){S.bids[name]=String(o.bid);if(name===channel)S.bid=String(o.bid)}
  if(o.rid)S.rids[name]=String(o.rid);
  if(o.pfp){S.pfps[name]=o.pfp;const f=S.favs.find(x=>x.n===name);if(f)f.p=o.pfp;renderBubbles()}
- save();
+ updateNow();save();
 }
 async function connect(){
- const my=++gen,name=channel;
+ const my=++gen,name=channel;retry=0;
  closeSock();$('.fallback')&&$('.fallback').remove();msgsEl.style.display='';
  msgsEl.innerHTML='';seen=new Set();stick=true;unseen=0;jump.classList.remove('show');
  hist=loadHist(name);
@@ -355,10 +399,7 @@ async function connect(){
  const rid=S.rids[name];
  if(rid)openSock(rid,my);
  else{
-  msgsEl.style.display='none';
-  const f=document.createElement('iframe');f.className='fallback';f.src='https://kick.com/popout/'+encodeURIComponent(name)+'/chat';chat.append(f);
-  cst.lastElementChild.textContent='kick chat';
-  sys('Tip: add this channel’s Chatroom ID in Settings to use the saved-history chat.');
+  chatFallback(name,'Tip: add this channel’s Chatroom ID in Settings to use the saved-history chat.');
  }
 }
 
@@ -368,7 +409,7 @@ function initial(n){const d=document.createElement('div');d.textContent=(n[0]||'
 function renderBubbles(){
  bubbles.innerHTML='';
  S.favs.forEach((f,i)=>{
-  const b=document.createElement('button');b.type='button';b.className='bub'+(f.n===channel?' on':'');b.style.animationDelay=Math.min(i*40,400)+'ms';
+  const b=document.createElement('button');b.type='button';b.className='bub'+(f.n===channel?' on':'')+(LIVE[f.n]?' live':'');if(popped)b.style.animation=LIVE[f.n]?'':'none';else b.style.animationDelay=Math.min(i*40,400)+'ms';
   b.title=f.n+' (hold to remove)';
   const av=document.createElement('div');av.className='av';
   if(f.p){const im=document.createElement('img');im.alt=f.n;im.referrerPolicy='no-referrer';im.src=f.p;im.onerror=()=>im.replaceWith(initial(f.n));av.append(im)}else av.append(initial(f.n));
@@ -379,17 +420,39 @@ function renderBubbles(){
   b.addEventListener('pointerdown',()=>{long=false;timer=setTimeout(()=>{long=true;rm()},650)});
   ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>clearTimeout(timer)));
   b.addEventListener('contextmenu',e=>{e.preventDefault();clearTimeout(timer);long=true;rm()});
-  b.addEventListener('click',()=>{if(long){long=false;return}$('#ch').value=f.n;watch(f.n)});
+  b.addEventListener('click',()=>{if(long){long=false;return}watch(f.n)});
   bubbles.append(b);
  });
+ if(S.favs.length)setTimeout(()=>{popped=true},600);
 }
-$('#addfav').onclick=async()=>{
- const n=($('#ch').value||channel||'').trim().toLowerCase();
- if(!n){sys('Type a channel name first.');return}
- if(S.favs.some(f=>f.n===n)){sys(n+' is already in your list. Hold a bubble to remove it.');return}
- S.favs.push({n,p:S.pfps[n]||''});save();renderBubbles();sys('Added '+n);
- const meta=await getMeta(n);applyMeta(n,meta);
-};
+$('#addfav').onclick=()=>{$('#addname').value='';$('#adlg').showModal();setTimeout(()=>$('#addname').focus(),60)};
+function addStreamer(){
+ const n=$('#addname').value.trim().toLowerCase().replace(/^https?:\/\/(www\.)?kick\.com\//,'').split(/[\/?#\s]/)[0].replace(/[^a-z0-9_-]/g,'');
+ if(!n)return;
+ $('#adlg').close();
+ if(!S.favs.some(f=>f.n===n)){S.favs.push({n,p:S.pfps[n]||''});save()}
+ watch(n);
+}
+$('#adgo').onclick=addStreamer;
+$('#adcancel').onclick=()=>$('#adlg').close();
+$('#addname').onkeydown=e=>{if(e.key==='Enter')addStreamer()};
+// "now watching" chip in the header
+function updateNow(){
+ const box=$('#now');box.innerHTML='';
+ if(!channel){const s=document.createElement('span');s.className='ph';s.textContent='Tap + to add a streamer';box.append(s);return}
+ const pf=S.pfps[channel],live=!!LIVE[channel];
+ let el;
+ if(pf){el=document.createElement('img');el.src=pf;el.alt='';el.referrerPolicy='no-referrer';el.onerror=()=>{const i=initial(channel);i.className='p';el.replaceWith(i)}}
+ else{el=initial(channel)}
+ el.classList.add('p');if(live)el.classList.add('live');
+ const n=document.createElement('span');n.className='nm';n.textContent=channel;
+ box.append(el,n);
+ if(live){const t=document.createElement('span');t.className='tag';t.textContent='LIVE';box.append(t)}
+}
+async function refreshLive(){
+ for(const f of S.favs){const m=await getMeta(f.n);applyMeta(f.n,m)}
+}
+setInterval(()=>{if(document.visibilityState==='visible')refreshLive()},60000);
 function setSide(open){document.body.classList.toggle('sideoff',!open);S.side=open?1:0;save()}
 $('#tog').onclick=()=>setSide(document.body.classList.contains('sideoff'));
 if(S.side===0)document.body.classList.add('sideoff');
@@ -400,11 +463,11 @@ function watch(name){
  if(typeof stopRepeat==='function')stopRepeat();
  $('#stage').innerHTML='';
  const f=document.createElement('iframe');
- f.src='https://player.kick.com/'+encodeURIComponent(channel);
+ f.src='https://player.kick.com/'+encodeURIComponent(channel)+'?autoplay=true&muted=false';
  f.allow='autoplay; fullscreen; picture-in-picture';f.allowFullscreen=true;
  $('#stage').append(f);
  S.channel=channel;S.bid=S.bids[channel]||'';save();
- renderQuickEmotes();renderBubbles();clearSt();
+ renderQuickEmotes();renderBubbles();updateNow();clearSt();
  connect().then(loadEmoteImages);
 }
 
@@ -582,8 +645,6 @@ function renderQuickEmotes(){
 }
 
 // UI wiring
-$('#go').onclick=()=>watch($('#ch').value);
-$('#ch').onkeydown=e=>{if(e.key==='Enter')watch($('#ch').value)};
 $('#send').onclick=()=>send($('#msg').value);
 $('#msg').onkeydown=e=>{if(e.key==='Enter')send($('#msg').value)};
 $('#cfg').onclick=()=>{
@@ -608,7 +669,7 @@ function applyPrefs(){
  });
 }
 
-function showUser(){$('#login').textContent=user?user.name:'Log in';$('#login').className=user?'':'pri';$('#acct').textContent=user?'Logged in as '+user.name:'Not logged in.'}
+function showUser(){const lg=$('#login');lg.textContent='';if(user){lg.className='me';const d=document.createElement('span');d.className='dot';d.textContent=(user.name||'?')[0].toUpperCase();const u=document.createElement('span');u.className='un';u.textContent=user.name;lg.title='Logged in as '+user.name;lg.append(d,u)}else{lg.className='pri';lg.textContent='Log in'}$('#acct').textContent=user?'Logged in as '+user.name:'Not logged in.'}
 $('#login').onclick=()=>{if(!user)location.href='/auth/login'};
 $('#logout').onclick=()=>{stopRepeat();location.href='/auth/logout'};
 fetch('/api/me').then(r=>r.ok?r.json():null).then(j=>{user=j;showUser()}).catch(()=>{});
@@ -629,8 +690,9 @@ $('#emobtn').onclick=()=>$('#emo').classList.toggle('open');
 applyPrefs();
 renderQuickEmotes();
 renderBubbles();
-S.favs.filter(f=>!f.p).forEach(async f=>{const m=await getMeta(f.n);applyMeta(f.n,m)});
-if(S.channel){$('#ch').value=S.channel;watch(S.channel)}
+updateNow();
+if(S.channel)watch(S.channel);
+refreshLive();
 
 </script>
 </body>
